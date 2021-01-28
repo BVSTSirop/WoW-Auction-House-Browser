@@ -1,6 +1,10 @@
 package ch.killenberger.wowauctionhousebrowser.service;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,24 +19,37 @@ import java.util.Locale;
 import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
+import ch.killenberger.wowauctionhousebrowser.model.auction.AuctionGroup;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
+import ch.killenberger.wowauctionhousebrowser.ui.AuctionsAdapter;
 
 public class ItemService extends AsyncTask<String, Void, List<Item>> {
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
     private final List<Item>          items       = new ArrayList<>();
     private final Locale              locale      = appSettings.getLocale();
     private final Region              region      = UserSettings.getInstance().getRegion();
+    private final ProgressDialog      dialog;
 
     private int currentId = 1;
+
+    public ItemService(Context context) {
+        this.dialog   = new ProgressDialog(context);
+    }
+
+    @Override
+    protected void onPreExecute() {
+        this.dialog.setMessage("Fetching item assets...");
+        this.dialog.show();
+    }
 
     @Override
     protected List<Item> doInBackground(String... strings) {
         final List<Item>     result = new ArrayList<>();
 
         List<Item> response;
-        while((response = parseResponse(HttpGetClient.gzipCall(assembleURl(currentId)))).size() > 0) {
+        while((response = parseResponse(HttpGetClient.call(assembleURl(currentId)))).size() > 0) {
             result.addAll(response);
 
             currentId = response.get(response.size() - 1).getId() + 1;
@@ -43,6 +60,15 @@ public class ItemService extends AsyncTask<String, Void, List<Item>> {
         db.close();
 
         return result;
+    }
+
+    @Override
+    protected void onPostExecute(List<Item> items) {
+        super.onPostExecute(items);
+
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 
     private List<Item> parseResponse(String resp) {

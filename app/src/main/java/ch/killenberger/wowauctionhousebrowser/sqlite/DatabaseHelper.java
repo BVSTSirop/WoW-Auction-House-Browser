@@ -96,8 +96,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         final long result = db.insert(TABLE_ITEM, null, values);
 
-        System.out.println("Created Item: " + i);
-
         return result;
     }
 
@@ -115,8 +113,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     values.put(COL_CLASS_ID,   i.getItemClassId());
 
                     db.insert(TABLE_ITEM, null, values);
-
-                    System.out.println("Created item: " + i);
 
                     values.clear();
                 }
@@ -180,8 +176,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         final long result = db.insert(TABLE_ITEM_CLASS, null, values);
 
-        System.out.println("Created Item Class: " + ic);
-
         return result;
     }
 
@@ -198,8 +192,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.insert(TABLE_ITEM_CLASS, null, values);
 
                 values.clear();
-
-                System.out.println("Created Item Class: " + ic);
             }
 
             db.setTransactionSuccessful();
@@ -257,8 +249,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         final long result = db.insert(TABLE_ITEM_SUB_CLASS, null, values);
 
-        System.out.println("Created Item SubClass: " + ic);
-
         return result;
     }
 
@@ -277,8 +267,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.insert(TABLE_ITEM_SUB_CLASS, null, values);
 
                 values.clear();
-
-                System.out.println("Created Item SubClass: " + subClass);
             }
 
             db.setTransactionSuccessful();

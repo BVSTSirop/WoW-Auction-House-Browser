@@ -2,7 +2,9 @@ package ch.killenberger.wowauctionhousebrowser;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -20,6 +22,7 @@ import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.Realm;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
+import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.service.ConnectedRealmService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemClassService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemService;
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         applicationSettings.setApplicationContext(getApplicationContext());
         userSettings.setRegion(Region.US);
 
+        // CREATE API ACCESS TOKEN
         try {
             ApplicationSettings.getInstance().setAccessToken(new OAuth2Service().execute().get());
         } catch (ExecutionException e) {
@@ -57,15 +61,56 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        // IMPORTANT: UNCOMMENT SECTION BELOW TO FETCH ALL THE REQUIRED ASSETS
+        // Fetches all necessary assets into local SQLite database
+/*
+        DatabaseHelper db = new DatabaseHelper(getApplicationContext());
+        db.resetDatabase();
+        db.close();
+*/
+
+        try {
+            fetchData();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
         this.regionSpinner = findViewById(R.id.regionSpinner);
         this.realmInput    = findViewById(R.id.realmInput);
         this.searchButton  = findViewById(R.id.searchButton);
-        this.adapter  = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, realms);
+        this.adapter       = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, realms);
 
-        realmInput.setAdapter(adapter);
-
+        // SETUP ADAPTERS
+        this.realmInput.setAdapter(adapter);
         this.regionSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Region.values()));
-        this.regionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        this.regionSpinner.setOnItemSelectedListener(createItemSelectedListener());
+
+        this.searchButton.setOnClickListener(createOnClickListener());
+    }
+
+    private void fetchData() throws ExecutionException, InterruptedException {
+        fetchItemClasses();
+        fetchItemSubClasses();
+        fetchItems();
+    }
+
+    private void fetchItemClasses() throws ExecutionException, InterruptedException {
+        System.out.println("Creating Item Classes...");
+        new ItemClassService().execute().get();
+    }
+
+    private void fetchItemSubClasses() throws ExecutionException, InterruptedException {
+        System.out.println("Creating Item SubClasses...");
+        new ItemSubClassService().execute().get();
+    }
+
+    public void fetchItems() throws ExecutionException, InterruptedException {
+        System.out.println("Creating Items...");
+        new ItemService(this).execute();
+    }
+
+    private AdapterView.OnItemSelectedListener createItemSelectedListener() {
+       return new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 userSettings.setRegion((Region) parent.getItemAtPosition(position));
@@ -86,9 +131,11 @@ public class MainActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
-        });
+        };
+    }
 
-        this.searchButton.setOnClickListener(new View.OnClickListener() {
+    private View.OnClickListener createOnClickListener() {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final String selectedRealm = realmInput.getText().toString();
@@ -112,38 +159,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(getBaseContext(), AuctionsActivity.class);
                 startActivity(intent);
             }
-        });
-
-/*        DatabaseHelper db = new DatabaseHelper(getApplicationContext());
-        db.resetDatabase();
-        db.close();
-
-        try {
-            fetchData();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }*/
-    }
-
-    private void fetchData() throws ExecutionException, InterruptedException {
-        fetchItemClasses();
-        fetchItemSubClasses();
-        fetchItems();
-        System.out.println("Finished importing data!");
-    }
-
-    private void fetchItemClasses() {
-        System.out.println("Creating Item Classes...");
-        new ItemClassService().execute();
-    }
-
-    private void fetchItemSubClasses() throws ExecutionException, InterruptedException {
-        System.out.println("Creating Item SubClasses...");
-        new ItemSubClassService().execute();
-    }
-
-    public void fetchItems() throws ExecutionException, InterruptedException {
-        System.out.println("Creating Items...");
-        new ItemService().execute();
+        };
     }
 }
