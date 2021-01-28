@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
@@ -25,23 +26,24 @@ import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.ui.AuctionsAdapter;
 
-public class ItemService extends AsyncTask<String, Void, List<Item>> {
+public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
     private final List<Item>          items       = new ArrayList<>();
     private final Locale              locale      = appSettings.getLocale();
     private final Region              region      = UserSettings.getInstance().getRegion();
-    private final ProgressDialog      dialog;
+    private ProgressDialog      dialog;
 
     private int currentId = 1;
+    private static int MAX_PROGRESS = 184000;
+    private Context context;
 
     public ItemService(Context context) {
-        this.dialog   = new ProgressDialog(context);
+        this.context = context;
     }
 
     @Override
     protected void onPreExecute() {
-        this.dialog.setMessage("Fetching item assets...");
-        this.dialog.show();
+        this.dialog = ProgressDialog.show(context,"Downloading", "Fetching item assets...");
     }
 
     @Override
