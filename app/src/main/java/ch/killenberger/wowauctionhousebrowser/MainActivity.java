@@ -67,13 +67,13 @@ public class MainActivity extends AppCompatActivity {
         DatabaseHelper db = new DatabaseHelper(getApplicationContext());
         db.resetDatabase();
         db.close();
-*/
 
         try {
             fetchData();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
+*/
 
         this.regionSpinner = findViewById(R.id.regionSpinner);
         this.realmInput    = findViewById(R.id.realmInput);
