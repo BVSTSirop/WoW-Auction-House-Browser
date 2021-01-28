@@ -41,14 +41,12 @@ public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGro
         super();
 
         this.mContext = context;
-        this.dialog   = new ProgressDialog(mContext);
         this.list     = list;
     }
 
     @Override
     protected void onPreExecute() {
-        this.dialog.setMessage("Loading auctions...");
-        this.dialog.show();
+        this.dialog = ProgressDialog.show(mContext,"Auctions", "Loading auctions...");
     }
 
     @Override

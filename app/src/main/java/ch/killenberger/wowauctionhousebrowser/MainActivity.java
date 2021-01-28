@@ -11,7 +11,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.Realm;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
-import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.service.ConnectedRealmService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemClassService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemService;
@@ -33,7 +31,6 @@ import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration mAppBarConfiguration;
     private AutoCompleteTextView realmInput;
     private Spinner              regionSpinner;
     private Button searchButton;
@@ -61,19 +58,13 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // IMPORTANT: UNCOMMENT SECTION BELOW TO FETCH ALL THE REQUIRED ASSETS
-        // Fetches all necessary assets into local SQLite database
-/*
-        DatabaseHelper db = new DatabaseHelper(getApplicationContext());
-        db.resetDatabase();
-        db.close();
-
-        try {
-            fetchData();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+        if(isFetchNecessary()) {
+            try {
+                fetchData();
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-*/
 
         this.regionSpinner = findViewById(R.id.regionSpinner);
         this.realmInput    = findViewById(R.id.realmInput);
@@ -104,9 +95,17 @@ public class MainActivity extends AppCompatActivity {
         new ItemSubClassService().execute().get();
     }
 
-    public void fetchItems() throws ExecutionException, InterruptedException {
+    private void fetchItems() {
         System.out.println("Creating Items...");
         new ItemService(this).execute();
+    }
+
+    private boolean isFetchNecessary() {
+        final DatabaseHelper db = new DatabaseHelper(this);
+        final boolean fetchComplete = db.isFetchComplete();
+        db.close();
+
+        return !fetchComplete;
     }
 
     private AdapterView.OnItemSelectedListener createItemSelectedListener() {

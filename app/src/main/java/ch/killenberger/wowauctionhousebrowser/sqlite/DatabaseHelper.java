@@ -25,6 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "WOWAUCTIONBROWSER";
 
     // Table Names
+    private static final String TABLE_FETCH_INFO = "FETCH_INFO";
     private static final String TABLE_ITEM = "ITEM";
     private static final String TABLE_ITEM_CLASS = "ITEM_CLASS";
     private static final String TABLE_ITEM_SUB_CLASS = "ITEM_SUB_CLASS";
@@ -39,6 +40,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // ITEM_SUB_CLASS Table - column names
     private static final String COL_ITEM_SUB_CLASS_ID = "SUB_CLASS_ID";
+
+    private static final String COL_FETCHED = "ITEM_FETCH_COMPLETED";
+
+    // Table Create Statements
+    private static final String CREATE_TABLE_FETCH_INFO = "CREATE TABLE " +
+            TABLE_FETCH_INFO + "(" + COL_FETCHED + " INTEGER)";
 
     // Table Create Statements
     private static final String CREATE_TABLE_ITEM = "CREATE TABLE " +
@@ -69,6 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // creating required tables
+        db.execSQL(CREATE_TABLE_FETCH_INFO);
         db.execSQL(CREATE_TABLE_ITEM_CLASS);
         db.execSQL(CREATE_TABLE_ITEM_SUB_CLASS);
         db.execSQL(CREATE_TABLE_ITEM);
@@ -77,6 +85,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         resetDatabase();
+    }
+
+    public long setItemFetchComplete() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COL_FETCHED, 1);
+
+        return db.insert(TABLE_FETCH_INFO, null, values);
+    }
+
+    public boolean isFetchComplete() {
+        final SQLiteDatabase db = this.getReadableDatabase();
+
+        final String     selectQuery = "SELECT  * FROM " + TABLE_FETCH_INFO;
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if(c.moveToFirst()) {
+            return true;
+        }
+
+        return false;
     }
 
     public long createItem(Item i) {
@@ -94,9 +124,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_ITEM_LEVEL, i.getLevel());
         values.put(COL_CLASS_ID,   i.getItemClassId());
 
-        final long result = db.insert(TABLE_ITEM, null, values);
-
-        return result;
+        return db.insert(TABLE_ITEM, null, values);
     }
 
     public void createItems(Collection<Item> items) {
@@ -285,6 +313,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void dropTables() {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FETCH_INFO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_SUB_CLASS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_CLASS);
