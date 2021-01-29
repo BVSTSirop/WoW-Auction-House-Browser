@@ -25,4 +25,4 @@ jobs:
       env:
        GITHUB_TOKEN: b67250f6e8439853656e72a69df3debb2174a22b
        APP_FOLDER: app
-       RELEASE_TITLE: New Release
+       RELEASE_TITLE: WoW Auction House Browser
