@@ -28,7 +28,6 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     private ProgressDialog      dialog;
 
     private int currentId = 1;
-    private static int MAX_PROGRESS = 184000;
     private Context context;
 
     public ItemService(Context context) {
@@ -85,6 +84,6 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     }
 
     private String assembleURl(final int id) {
-       return this.region.getHost() + "/data/wow/search/item?namespace=" + this.region.getStaticNamespace() + "&_pageSize=1000&orderby=id:asc&id=[" + currentId + ",]&locale=" + this.locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
+        return this.region.getHost() + "/data/wow/search/item?namespace=" + this.region.getStaticNamespace() + "&_pageSize=1000&orderby=id:asc&id=[" + currentId + ",]&locale=" + this.locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
     }
 }

@@ -15,7 +15,6 @@ import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
-import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 
@@ -35,6 +34,7 @@ public class ItemClassService extends AsyncTask<String, Void, List<ItemClass>> {
 
             DatabaseHelper db = new DatabaseHelper(ApplicationSettings.getInstance().getApplicationContext());
             db.createItemClasses(result);
+            db.setItemClassFetchComplete();
             db.close();
         } catch (JsonProcessingException e) {
             e.printStackTrace();

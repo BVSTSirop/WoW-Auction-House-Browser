@@ -75,8 +75,9 @@ public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGro
         final Map<Integer, AuctionGroup> groups = new HashMap<>();
         final DatabaseHelper             db     = new DatabaseHelper(appSettings.getApplicationContext());
 
-        for(Auction a : auctions) {
-            final int itemId = a.getItemId();
+        for(Auction auction : auctions) {
+            final int  itemId = auction.getItemId();
+            final long price  = auction.getPrice();
 
             if(!groups.containsKey(itemId)) {
                 final Item item = db.getItemById(itemId);
@@ -84,7 +85,14 @@ public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGro
                 groups.put(itemId, new AuctionGroup(item));
             }
 
-            groups.get(itemId).add(a);
+            final AuctionGroup group = groups.get(itemId);
+
+            if(group.hasAucitonWithPrice(price)) {
+                Auction a = group.getAuctionByPrice(price);
+                a.setQuantity(a.getQuantity() + auction.getQuantity());
+            } else {
+                group.add(auction);
+            }
         }
 
         db.close();

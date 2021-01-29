@@ -12,22 +12,26 @@ public class Item implements Parcelable {
     private int    id;
     private String name;
     private int    level;
-    private int    itemClassId;
+    private int classId;
+    private int    subClassId;
+
 
     public Item() { }
 
-    public Item(final int id, final String name, final int level, final int itemClassId) {
-        this.id        = id;
-        this.name      = name;
-        this.level     = level;
-        this.itemClassId = itemClassId;
+    public Item(final int id, final String name, final int level, final int classId, final int subClassId) {
+        this.id         = id;
+        this.name       = name;
+        this.level      = level;
+        this.classId    = classId;
+        this.subClassId = subClassId;
     }
 
     protected Item(Parcel in) {
-        id = in.readInt();
-        name = in.readString();
-        level = in.readInt();
-        itemClassId = in.readInt();
+        this.id         = in.readInt();
+        this.name       = in.readString();
+        this.level      = in.readInt();
+        this.classId    = in.readInt();
+        this.subClassId = in.readInt();
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -66,12 +70,20 @@ public class Item implements Parcelable {
         this.level = level;
     }
 
-    public int getItemClassId() {
-        return itemClassId;
+    public int getClassId() {
+        return classId;
     }
 
-    public void setItemClassId(int itemClassId) {
-        this.itemClassId = itemClassId;
+    public void setClassId(int classId) {
+        this.classId = classId;
+    }
+
+    public int getSubClassId() {
+        return subClassId;
+    }
+
+    public void setSubClassId(int subClassId) {
+        this.subClassId = subClassId;
     }
 
     @Override
@@ -80,7 +92,8 @@ public class Item implements Parcelable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", level=" + level +
-                ", itemClassId=" + itemClassId +
+                ", classId=" + classId +
+                ", subClassId=" + subClassId +
                 '}';
     }
 
@@ -91,9 +104,10 @@ public class Item implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(name);
-        dest.writeInt(level);
-        dest.writeInt(itemClassId);
+        dest.writeInt(this.id);
+        dest.writeString(this.name);
+        dest.writeInt(this.level);
+        dest.writeInt(this.classId);
+        dest.writeInt(this.subClassId);
     }
 }

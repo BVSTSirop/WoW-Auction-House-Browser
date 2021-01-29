@@ -45,6 +45,26 @@ public class AuctionGroup implements Comparable<AuctionGroup>, Parcelable {
         return lowest;
     }
 
+    public boolean hasAucitonWithPrice(final long price) {
+        for(Auction a : auctions) {
+            if(a.getPrice() == price) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Auction getAuctionByPrice(final long price) {
+        for(Auction a : auctions) {
+            if(a.getPrice() == price) {
+                return a;
+            }
+        }
+
+        return null;
+    }
+
     public int getTotalQuantity() {
         int quantity = 0;
 

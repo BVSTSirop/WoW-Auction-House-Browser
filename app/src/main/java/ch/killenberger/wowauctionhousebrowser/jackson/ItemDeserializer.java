@@ -29,12 +29,13 @@ public class ItemDeserializer extends StdDeserializer<Item> {
         final Locale   lang = ApplicationSettings.getInstance().getLocale();
 
         try {
-            final int    id      = node.get("id").asInt();
-            final int    level   = node.get("level").asInt();
-            final String name    = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
-            final int    classId = node.get("item_class").get("id").asInt();
+            final int    id         = node.get("id").asInt();
+            final int    level      = node.get("level").asInt();
+            final String name       = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
+            final int    classId    = node.get("item_class").get("id").asInt();
+            final int    subClassId = node.get("item_subclass").get("id").asInt();
 
-            return new Item(id, name, level, classId);
+            return new Item(id, name, level, classId, subClassId);
         } catch (Exception e) {
             e.printStackTrace();
 

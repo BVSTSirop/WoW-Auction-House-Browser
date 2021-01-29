@@ -50,6 +50,7 @@ public class ItemSubClassService extends AsyncTask<String, Void, List<ItemClass>
             }
         }
 
+        db.setItemSubClassFetchComplete();
         db.close();
 
         return result;

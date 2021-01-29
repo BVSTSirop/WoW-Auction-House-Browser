@@ -2,9 +2,7 @@ package ch.killenberger.wowauctionhousebrowser;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -34,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView realmInput;
     private Spinner              regionSpinner;
     private Button searchButton;
+    private Button resetButton;
 
     private UserSettings        userSettings        = UserSettings.getInstance();
     private ApplicationSettings applicationSettings = ApplicationSettings.getInstance();
@@ -52,23 +51,20 @@ public class MainActivity extends AppCompatActivity {
         // CREATE API ACCESS TOKEN
         try {
             ApplicationSettings.getInstance().setAccessToken(new OAuth2Service().execute().get());
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
 
-        if(isFetchNecessary()) {
-            try {
-                fetchData();
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            fetchDataIfNecessary();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
         }
 
         this.regionSpinner = findViewById(R.id.regionSpinner);
         this.realmInput    = findViewById(R.id.realmInput);
         this.searchButton  = findViewById(R.id.searchButton);
+        this.resetButton  = findViewById(R.id.resetDatabaseButton);
         this.adapter       = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, realms);
 
         // SETUP ADAPTERS
@@ -76,13 +72,30 @@ public class MainActivity extends AppCompatActivity {
         this.regionSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Region.values()));
         this.regionSpinner.setOnItemSelectedListener(createItemSelectedListener());
 
-        this.searchButton.setOnClickListener(createOnClickListener());
+        this.searchButton.setOnClickListener(createRealmOnClickListener());
+        this.resetButton.setOnClickListener(createResetDbnClickListener());
     }
 
-    private void fetchData() throws ExecutionException, InterruptedException {
-        fetchItemClasses();
-        fetchItemSubClasses();
-        fetchItems();
+    private void fetchDataIfNecessary() throws ExecutionException, InterruptedException {
+        final DatabaseHelper db = new DatabaseHelper(this);
+
+        final boolean itemClassesExist    = db.isItemClassFetchComplete();
+        final boolean itemSubClassesExist = db.isItemSubClassFetchComplete();
+        final boolean itemsExist          = db.isItemFetchComplete();
+
+        db.close();
+
+        if(!itemClassesExist) {
+            fetchItemClasses();
+        }
+
+        if(!itemSubClassesExist) {
+            fetchItemSubClasses();
+        }
+
+        if(!itemsExist) {
+            fetchItems();
+        }
     }
 
     private void fetchItemClasses() throws ExecutionException, InterruptedException {
@@ -98,14 +111,6 @@ public class MainActivity extends AppCompatActivity {
     private void fetchItems() {
         System.out.println("Creating Items...");
         new ItemService(this).execute();
-    }
-
-    private boolean isFetchNecessary() {
-        final DatabaseHelper db = new DatabaseHelper(this);
-        final boolean fetchComplete = db.isFetchComplete();
-        db.close();
-
-        return !fetchComplete;
     }
 
     private AdapterView.OnItemSelectedListener createItemSelectedListener() {
@@ -133,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    private View.OnClickListener createOnClickListener() {
+    private View.OnClickListener createRealmOnClickListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,6 +162,23 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(getBaseContext(), AuctionsActivity.class);
                 startActivity(intent);
+            }
+        };
+    }
+
+    private View.OnClickListener createResetDbnClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseHelper db = new DatabaseHelper(MainActivity.this);
+                db.resetDatabase();
+                db.close();;
+
+                try {
+                    fetchDataIfNecessary();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
