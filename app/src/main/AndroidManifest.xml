@@ -12,11 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.WoWAuctionHouseBrowser">
-        <activity android:name=".AuctionDetailsActivty"></activity>
-
-        <meta-data
-            android:name="com.google.android.wearable.standalone"
-            android:value="true" />
+        <activity android:name=".AuctionDetailsActivity"></activity>
 
         <activity
             android:name=".AuctionsActivity"
@@ -27,7 +23,6 @@
             android:theme="@style/Theme.WoWAuctionHouseBrowser.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

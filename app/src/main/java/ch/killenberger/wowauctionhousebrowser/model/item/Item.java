@@ -12,7 +12,7 @@ public class Item implements Parcelable {
     private int    id;
     private String name;
     private int    level;
-    private int classId;
+    private int    classId;
     private int    subClassId;
 
 

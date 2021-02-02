@@ -22,12 +22,10 @@ import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 
 public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
-    private final List<Item>          items       = new ArrayList<>();
     private final Locale              locale      = appSettings.getLocale();
     private final Region              region      = UserSettings.getInstance().getRegion();
-    private ProgressDialog      dialog;
+    private ProgressDialog            dialog;
 
-    private int currentId = 1;
     private Context context;
 
     public ItemService(Context context) {
@@ -43,6 +41,18 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     protected List<Item> doInBackground(String... strings) {
         final List<Item>     result = new ArrayList<>();
 
+        final DatabaseHelper db = new DatabaseHelper(appSettings.getApplicationContext());
+        int localHighestId = db.getHighestItemId();
+
+        int currentId;
+        if(localHighestId == -1) {
+            currentId = 1;
+        } else {
+            currentId = localHighestId + 1;
+        }
+
+        db.close();
+
         List<Item> response;
         while((response = parseResponse(HttpGetClient.call(assembleURl(currentId)))).size() > 0) {
             result.addAll(response);
@@ -50,10 +60,9 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
             currentId = response.get(response.size() - 1).getId() + 1;
         }
 
-        final DatabaseHelper db = new DatabaseHelper(appSettings.getApplicationContext());
-        db.createItems(result);
 
-        db.setItemFetchComplete();
+
+        db.createItems(result);
 
         db.close();
 
@@ -84,6 +93,6 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     }
 
     private String assembleURl(final int id) {
-        return this.region.getHost() + "/data/wow/search/item?namespace=" + this.region.getStaticNamespace() + "&_pageSize=1000&orderby=id:asc&id=[" + currentId + ",]&locale=" + this.locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
+        return this.region.getHost() + "/data/wow/search/item?namespace=" + this.region.getStaticNamespace() + "&_pageSize=1000&orderby=id:asc&id=[" + id + ",]&locale=" + this.locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
     }
 }

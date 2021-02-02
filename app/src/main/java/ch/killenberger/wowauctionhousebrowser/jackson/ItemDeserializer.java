@@ -24,24 +24,16 @@ public class ItemDeserializer extends StdDeserializer<Item> {
     }
 
     @Override
-    public Item deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public Item deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         final JsonNode node = (JsonNode) p.getCodec().readTree(p).get("data");
         final Locale   lang = ApplicationSettings.getInstance().getLocale();
 
-        try {
-            final int    id         = node.get("id").asInt();
-            final int    level      = node.get("level").asInt();
-            final String name       = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
-            final int    classId    = node.get("item_class").get("id").asInt();
-            final int    subClassId = node.get("item_subclass").get("id").asInt();
+        final int    id         = node.get("id").asInt();
+        final int    level      = node.get("level").asInt();
+        final String name       = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
+        final int    classId    = node.get("item_class").get("id").asInt();
+        final int    subClassId = node.get("item_subclass").get("id").asInt();
 
-            return new Item(id, name, level, classId, subClassId);
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            System.out.println(node.toPrettyString());
-        }
-
-        return null;
+        return new Item(id, name, level, classId, subClassId);
     }
 }

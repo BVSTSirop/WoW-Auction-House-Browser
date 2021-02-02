@@ -34,7 +34,6 @@ public class ItemClassService extends AsyncTask<String, Void, List<ItemClass>> {
 
             DatabaseHelper db = new DatabaseHelper(ApplicationSettings.getInstance().getApplicationContext());
             db.createItemClasses(result);
-            db.setItemClassFetchComplete();
             db.close();
         } catch (JsonProcessingException e) {
             e.printStackTrace();

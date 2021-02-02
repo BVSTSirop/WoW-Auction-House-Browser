@@ -40,9 +40,6 @@ public class ItemClass {
 
     @Override
     public String toString() {
-        return "ItemClass{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+        return this.name;
     }
 }

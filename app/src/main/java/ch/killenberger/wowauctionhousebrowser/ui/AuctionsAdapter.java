@@ -1,5 +1,6 @@
 package ch.killenberger.wowauctionhousebrowser.ui;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -9,14 +10,16 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.internal.ViewOverlayImpl;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import ch.killenberger.wowauctionhousebrowser.AuctionDetailsActivty;
-import ch.killenberger.wowauctionhousebrowser.AuctionsActivity;
+import ch.killenberger.wowauctionhousebrowser.AuctionDetailsActivity;
 import ch.killenberger.wowauctionhousebrowser.R;
+import ch.killenberger.wowauctionhousebrowser.model.auction.Auction;
 import ch.killenberger.wowauctionhousebrowser.model.auction.AuctionGroup;
+import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
@@ -50,14 +53,17 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
     }
 
     // Store a member variable for the contacts
+    private final List<AuctionGroup> auctionGroups;
     private List<AuctionGroup> mAuction;
 
     // Pass in the contact array into the constructor
     public AuctionsAdapter(List<AuctionGroup> auctions) {
-        mAuction = auctions;
+        auctionGroups = auctions;
+        mAuction    = new ArrayList<>(auctionGroups);
     }
 
     // Usually involves inflating a layout from XML and returning the holder
+    @NotNull
     @Override
     public AuctionsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
@@ -72,7 +78,7 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
         auctionView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final int itemId = Integer.valueOf((String) viewHolder.id.getText());
+                final int itemId = Integer.parseInt((String) viewHolder.id.getText());
 
                 AuctionGroup group = null;
                 for(AuctionGroup g : mAuction) {
@@ -83,7 +89,7 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
                     }
                 }
 
-                Intent intent = new Intent(context, AuctionDetailsActivty.class);
+                Intent intent = new Intent(context, AuctionDetailsActivity.class);
                 intent.putExtra("AUCTION_GROUP", group);
                 context.startActivity(intent);
             }
@@ -111,6 +117,68 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
 
         TextView quantity = holder.quantity;
         quantity.setText(String.valueOf(auction.getTotalQuantity()));
+    }
+
+    public void filter(final String name, final int classId, final int subClassId) {
+        if(classId == -1) {             // No class filter applied
+            resetFilters();
+        } else if (subClassId == -1) {  // No subclass filter applied
+            filterByClass(classId);
+        } else {
+            filterBySubClass(classId, subClassId);
+        }
+
+        if(!name.isEmpty()) {
+            filterByName(name);
+        }
+    }
+
+    private void resetFilters() {
+        mAuction = new ArrayList<>(auctionGroups);
+
+        notifyDataSetChanged();
+    }
+
+    private void filterByClass(final int id) {
+        mAuction.clear();
+
+        for(AuctionGroup ag : this.auctionGroups) {
+            if(ag.getItem().getClassId() == id) {
+                mAuction.add(ag);
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    private void filterBySubClass(final int parentClassId, final int subClassId) {
+        this.mAuction.clear();
+
+        for(AuctionGroup ag : this.auctionGroups) {
+            final Item item = ag.getItem();
+
+            if(item.getClassId() == parentClassId && item.getSubClassId() == subClassId) {
+                mAuction.add(ag);
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    private void filterByName(final String name) {
+        final List<AuctionGroup> filtered = new ArrayList<>();
+
+        for(AuctionGroup ag : this.mAuction) {
+            final Item item = ag.getItem();
+
+            if(item.getName() != null && item.getName().toLowerCase().contains(name.toLowerCase())) {
+                filtered.add(ag);
+            }
+        }
+
+        this.mAuction = filtered;
+
+        notifyDataSetChanged();
     }
 
     // Returns the total count of items in the list

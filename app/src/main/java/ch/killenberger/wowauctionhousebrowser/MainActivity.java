@@ -1,7 +1,10 @@
 package ch.killenberger.wowauctionhousebrowser;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -11,6 +14,11 @@ import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -20,9 +28,12 @@ import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.Realm;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.service.ConnectedRealmService;
+import ch.killenberger.wowauctionhousebrowser.service.ItemClassUpdateService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemClassService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemSubClassService;
+import ch.killenberger.wowauctionhousebrowser.service.ItemSubClassUpdateService;
+import ch.killenberger.wowauctionhousebrowser.service.ItemUpdateService;
 import ch.killenberger.wowauctionhousebrowser.service.OAuth2Service;
 import ch.killenberger.wowauctionhousebrowser.service.RealmService;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
@@ -47,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
         applicationSettings.setApplicationContext(getApplicationContext());
         userSettings.setRegion(Region.US);
+
+        copyDatabse();
 
         // CREATE API ACCESS TOKEN
         try {
@@ -77,23 +90,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchDataIfNecessary() throws ExecutionException, InterruptedException {
-        final DatabaseHelper db = new DatabaseHelper(this);
-
-        final boolean itemClassesExist    = db.isItemClassFetchComplete();
-        final boolean itemSubClassesExist = db.isItemSubClassFetchComplete();
-        final boolean itemsExist          = db.isItemFetchComplete();
-
-        db.close();
-
-        if(!itemClassesExist) {
+        final boolean itemClassUpdateRequired = new ItemClassUpdateService().execute().get();
+        if(itemClassUpdateRequired) {
             fetchItemClasses();
         }
 
-        if(!itemSubClassesExist) {
+        final boolean itemSubClassUpdateRequired = new ItemSubClassUpdateService().execute().get();
+        if(itemSubClassUpdateRequired) {
             fetchItemSubClasses();
         }
 
-        if(!itemsExist) {
+        final boolean itemUpdateRequired = new ItemUpdateService().execute().get();
+        if(itemUpdateRequired) {
             fetchItems();
         }
     }
@@ -181,5 +189,31 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    private void copyDatabse() {
+        final String databaseDir  = "databases";
+        final String databaseName = "WOWAUCTIONBROWSER";
+        final String appDataPath  = this.getApplicationInfo().dataDir;
+
+        //Make sure the /databases folder exists
+        File dbFolder = new File(appDataPath + "/" + databaseDir);
+        dbFolder.mkdir();//This can be called multiple times.
+
+        File dbFilePath = new File(appDataPath + "/" + databaseDir + "/" + databaseName);
+
+        try (InputStream  is = this.getAssets().open(databaseName)) {
+            try (OutputStream os = new FileOutputStream(dbFilePath)) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, length);
+                }
+
+                os.flush();
+            }
+        } catch (IOException e){
+            Log.e("DATABASE", "FAILED TO COPY DATABAE TO DATA DIR");
+        }
     }
 }
