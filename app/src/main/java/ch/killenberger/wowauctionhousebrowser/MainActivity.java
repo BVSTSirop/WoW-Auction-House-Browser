@@ -1,7 +1,10 @@
 package ch.killenberger.wowauctionhousebrowser;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -13,6 +16,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,6 +44,8 @@ import ch.killenberger.wowauctionhousebrowser.service.RealmService;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String DB_DIR  = "databases";
+    private static final String DB_NAME = "WOWAUCTIONBROWSER";
 
     private AutoCompleteTextView realmInput;
     private Spinner              regionSpinner;
@@ -59,7 +66,11 @@ public class MainActivity extends AppCompatActivity {
         applicationSettings.setApplicationContext(getApplicationContext());
         userSettings.setRegion(Region.US);
 
-        copyDatabse();
+        checkPermissions();
+
+        if(!databaseExists()) {
+            copyDatabse();
+        }
 
         // CREATE API ACCESS TOKEN
         try {
@@ -191,18 +202,27 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    public void checkPermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        }
+    }
+
+    private boolean databaseExists() {
+        return new File(this.getApplicationInfo().dataDir + "/" + DB_DIR + "/" + DB_NAME).exists();
+    }
+
     private void copyDatabse() {
-        final String databaseDir  = "databases";
-        final String databaseName = "WOWAUCTIONBROWSER";
         final String appDataPath  = this.getApplicationInfo().dataDir;
 
         //Make sure the /databases folder exists
-        File dbFolder = new File(appDataPath + "/" + databaseDir);
+        File dbFolder = new File(appDataPath + "/" + DB_DIR);
         dbFolder.mkdir();//This can be called multiple times.
 
-        File dbFilePath = new File(appDataPath + "/" + databaseDir + "/" + databaseName);
+        File dbFilePath = new File(appDataPath + "/" + DB_DIR + "/" + DB_NAME);
 
-        try (InputStream  is = this.getAssets().open(databaseName)) {
+        try (InputStream  is = this.getAssets().open(DB_NAME)) {
             try (OutputStream os = new FileOutputStream(dbFilePath)) {
                 byte[] buffer = new byte[1024];
                 int length;
