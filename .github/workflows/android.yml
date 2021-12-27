@@ -52,6 +52,6 @@ jobs:
           repo_token: "${{ secrets.TOKEN }}"
           automatic_release_tag: "latest"
           prerelease: true
-          title: "WoW Auction House Browser - Pre-Release"
+          title: "WoW Auction House Browser"
           files: |
             ./WoW Auction House Browser/*.apk
