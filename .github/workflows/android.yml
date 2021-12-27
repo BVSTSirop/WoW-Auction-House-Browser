@@ -36,7 +36,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: apk
+          name: WoW Auction House Browser
           path: app/build/outputs/apk/debug/app-debug.apk 
   release:
     name: Release APK
@@ -45,10 +45,11 @@ jobs:
     steps:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v2
-      - uses: actions/checkout@master
-      - name: Create a Release
-        uses: elgohr/Github-Release-Action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      - name: Release
-        uses: softprops/action-gh-release@v1
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            *.apk
