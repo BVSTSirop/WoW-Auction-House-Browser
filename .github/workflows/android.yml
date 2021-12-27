@@ -15,6 +15,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v2
         with:
+          distribution: 'zulu'
           java-version: 1.8
       - name: Run Tests
         run: bash ./gradlew test --stacktrace  
@@ -28,6 +29,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v2
         with:
+          distribution: 'zulu'
           java-version: 1.8
       - name: Build APK
         run: bash ./gradlew assembleDebug --stacktrace
