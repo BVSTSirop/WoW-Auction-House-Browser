@@ -28,6 +28,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: "Build Changelog"
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@{latest-release}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Pre-Release
         id: create_pre_release
         uses: actions/create-release@v1
@@ -36,5 +41,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Pre-Release ${{ github.ref }}
+          body: |
+            ${{steps.build_changelog.outputs.changelog}}
           draft: false
           prerelease: true
