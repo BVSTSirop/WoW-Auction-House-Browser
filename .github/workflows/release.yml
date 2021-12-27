@@ -1,0 +1,35 @@
+name: "Tagged Release"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  run-tests:
+    name: "Run Test Cases"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+          cache: gradle
+      - name: Run Tests
+        run: bash ./gradlew test --stacktrace
+      
+  publish-release:
+    name: "Publish Release"
+    runs-on: "ubuntu-latest"
+    needs: run-tests
+    steps:
+      - name: Create Tagged Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          prerelease: false
+          files: |
+            *.apk
