@@ -19,7 +19,7 @@ jobs:
           java-version: '8'
           cache: gradle
       - name: Run Tests
-        run: ./gradlew test --stacktrace
+        run: bash ./gradlew test --stacktrace
       
   publish-pre-release:
     name: "Publish Pre-Release"
