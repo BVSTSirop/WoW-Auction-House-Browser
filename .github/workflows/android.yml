@@ -46,7 +46,7 @@ jobs:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v2
       - run: ls -la
-      - run: unzip *.zip
+      - run: unzip "WoW Auction House Browser"
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
