@@ -33,6 +33,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v2.7.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: ls -la ./app/
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
