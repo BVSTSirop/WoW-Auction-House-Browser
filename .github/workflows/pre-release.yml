@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build APK
         run: bash ./gradlew assembleDebug
+      - run: ls -la ./app
       - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v2.7.1
