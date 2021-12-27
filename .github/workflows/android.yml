@@ -22,7 +22,8 @@ jobs:
           cache: gradle
       - name: Run Tests
         run: bash ./gradlew test --stacktrace
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - name: Create Tagged Release
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
           prerelease: false
