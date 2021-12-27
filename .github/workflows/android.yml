@@ -54,4 +54,4 @@ jobs:
           prerelease: true
           title: "WoW Auction House Browser - Pre-Release"
           files: |
-            *.apk
+            ./WoW Auction House Browser/*.apk
