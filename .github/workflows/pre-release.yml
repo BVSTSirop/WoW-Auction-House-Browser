@@ -19,7 +19,7 @@ jobs:
           java-version: '8'
           cache: gradle
       - name: Run Tests
-        run: bash ./gradlew test --stacktrace
+        run: ./gradlew test --stacktrace
       
   publish-pre-release:
     name: "Publish Pre-Release"
@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Run Tests
+        run: ./gradlew assembleDebug
       - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v2.7.1
