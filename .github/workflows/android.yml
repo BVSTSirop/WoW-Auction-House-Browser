@@ -1,4 +1,4 @@
-name: Minimal Android CI Workflow
+name: Build and Release Pre-Release
 
 on:
   push:
