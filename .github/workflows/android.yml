@@ -17,6 +17,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8'
+          cache: gradle
       - name: Run Tests
         run: bash ./gradlew test --stacktrace  
   apk:
@@ -31,8 +32,9 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8'
+          cache: gradle
       - name: Build APK
-        run: bash ./gradlew assembleDebug --stacktrace
+        run: bash ./gradlew assembleDebug --stacktrace --no-daemon
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
