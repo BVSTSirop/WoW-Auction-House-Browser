@@ -33,16 +33,11 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v2.7.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: ls -la
-      - name: Create Pre-Release
-        id: create_pre_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Pre-Release ${{ github.ref }}
-          body: |
-            ${{steps.build_changelog.outputs.changelog}}
-          draft: false
+          repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: "latest"
           prerelease: true
+          title: "WoW Auction House Browser"
+          files: |
+            ./app/build/ouputs/apk/debug/app-debug.apk
