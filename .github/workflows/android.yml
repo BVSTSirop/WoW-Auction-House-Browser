@@ -36,7 +36,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: WoW Auction House Browser
+          name: "WoW Auction House Browser"
           path: app/build/outputs/apk/debug/app-debug.apk 
   release:
     name: Release APK
@@ -50,6 +50,6 @@ jobs:
           repo_token: "${{ secrets.TOKEN }}"
           automatic_release_tag: "latest"
           prerelease: true
-          title: "Development Build"
+          title: "WoW Auction House Browser - Pre-Release"
           files: |
             *.apk
