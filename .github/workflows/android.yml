@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v2
-      - run: ls -la
+      - run: ls -la "WoW Auction House Browser"
       - run: less "WoW Auction House Browser"
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
