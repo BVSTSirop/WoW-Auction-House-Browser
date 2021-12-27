@@ -36,7 +36,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: "WoW Auction House Browser.zip"
+          name: "WoW Auction House Browser"
           path: app/build/outputs/apk/debug/app-debug.apk 
   release:
     name: Release APK
@@ -46,7 +46,7 @@ jobs:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v2
       - run: ls -la
-      - run: less "WoW Auction House Browser.zip"
+      - run: less "WoW Auction House Browser"
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.TOKEN }}"
