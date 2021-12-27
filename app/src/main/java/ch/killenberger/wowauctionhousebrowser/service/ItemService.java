@@ -8,17 +8,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import ch.killenberger.wowauctionhousebrowser.R;
 import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
+import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
@@ -26,15 +29,17 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
     private final Region              region      = UserSettings.getInstance().getRegion();
     private ProgressDialog            dialog;
 
-    private Context context;
+    private final Context mContext;
+
+    private Exception exception;
 
     public ItemService(Context context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     @Override
     protected void onPreExecute() {
-        this.dialog = ProgressDialog.show(context,"Downloading", "Fetching item assets...");
+        this.dialog = ProgressDialog.show(mContext,"Downloading", "Fetching item assets...");
     }
 
     @Override
@@ -53,14 +58,16 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
 
         db.close();
 
-        List<Item> response;
-        while((response = parseResponse(HttpGetClient.call(assembleURl(currentId)))).size() > 0) {
-            result.addAll(response);
+        try {
+            List<Item> response;
+            while ((response = parseResponse(HttpGetClient.call(assembleURl(currentId)))).size() > 0) {
+                result.addAll(response);
 
-            currentId = response.get(response.size() - 1).getId() + 1;
+                currentId = response.get(response.size() - 1).getId() + 1;
+            }
+        } catch (IOException e) {
+            this.exception = e;
         }
-
-
 
         db.createItems(result);
 
@@ -75,6 +82,10 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
 
         if (dialog.isShowing()) {
             dialog.dismiss();
+        }
+
+        if(exception != null) {
+            AlertUtil.createAlertDialog(this.mContext, "Oops", this.mContext.getString(R.string.connection_failed_error_msg));
         }
     }
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/auctionHeaderLayout">
+        <TextView
+            android:id="@+id/auctionItemPriceHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:text="Price" />
+        <TextView
+            android:id="@+id/auctionItemNameHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".5"
+            android:text="Item" />
+
+        <TextView
+            android:id="@+id/auctionItemLevelHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".125"
+            android:text="Level" />
+
+        <TextView
+            android:id="@+id/auctionItemQuantityHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".125"
+            android:text="Qty" />
+</LinearLayout>

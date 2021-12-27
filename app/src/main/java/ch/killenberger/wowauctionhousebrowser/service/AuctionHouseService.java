@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ch.killenberger.wowauctionhousebrowser.R;
 import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
@@ -29,10 +30,13 @@ import ch.killenberger.wowauctionhousebrowser.model.auction.AuctionGroup;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.ui.AuctionsAdapter;
+import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGroup>> {
     final UserSettings        userSettings = UserSettings.getInstance();
     final ApplicationSettings appSettings  = ApplicationSettings.getInstance();
+
+    private Exception exception; // Used for exception handling
 
     private Context        mContext;
     private ProgressDialog dialog;
@@ -55,21 +59,19 @@ public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGro
         final Locale locale           = appSettings.getLocale();
         final Region region           = userSettings.getRegion();
         final int    connectedRealmId = userSettings.getConnectedRealmId();
-        final String endpoint = region.getHost() + "/data/wow/connected-realm/" + connectedRealmId + "/auctions?namespace="+ region.getDynamicNamespace() + "&locale=" + locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
+        final String endpoint         = region.getHost() + "/data/wow/connected-realm/" + connectedRealmId + "/auctions?namespace="+ region.getDynamicNamespace() + "&locale=" + locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
 
-        final String response = HttpGetClient.gzipCall(endpoint);
-
-        List<AuctionGroup> result = new ArrayList<>();
 
         try {
-            List<Auction> auctions = parseResponse(response);
+            final String        response = HttpGetClient.gzipCall(endpoint);
+            final List<Auction> auctions = parseResponse(response);
 
-            result = groupAuctions(auctions);
+            return groupAuctions(auctions);
         } catch (IOException e) {
-            e.printStackTrace();
+            this.exception = e;
         }
 
-        return result;
+        return new ArrayList<>();
     }
 
     private List<AuctionGroup> groupAuctions(List<Auction> auctions) {
@@ -110,6 +112,10 @@ public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGro
 
         if (dialog.isShowing()) {
             dialog.dismiss();
+        }
+
+        if(exception != null) {
+            AlertUtil.createAlertDialog(mContext, "Oops", this.mContext.getString(R.string.connection_failed_error_msg));
         }
 
         list.setAdapter(new AuctionsAdapter(auctions));

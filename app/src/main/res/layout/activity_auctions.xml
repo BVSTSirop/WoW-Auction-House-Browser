@@ -66,42 +66,7 @@
             android:layout_height="wrap_content"
             android:text="Filter" />
 
-        <LinearLayout
-            android:id="@+id/headerLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/auctionItemPriceHeader"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".3"
-                android:text="Price" />
-
-            <TextView
-                android:id="@+id/auctionItemNameHeader"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:text="Item" />
-
-            <TextView
-                android:id="@+id/auctionItemLevelHeader"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".125"
-                android:text="Level" />
-
-            <TextView
-                android:id="@+id/auctionItemQuantityHeader"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".125"
-                android:text="Qty" />
-        </LinearLayout>
-
+        <include layout="@layout/auction_groups_header_layout" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/acutionsRecyclerView"

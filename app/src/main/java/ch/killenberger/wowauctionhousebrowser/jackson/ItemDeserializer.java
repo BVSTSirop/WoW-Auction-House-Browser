@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.util.Locale;
 
+import ch.killenberger.wowauctionhousebrowser.enums.ItemQuality;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
@@ -28,12 +29,13 @@ public class ItemDeserializer extends StdDeserializer<Item> {
         final JsonNode node = (JsonNode) p.getCodec().readTree(p).get("data");
         final Locale   lang = ApplicationSettings.getInstance().getLocale();
 
-        final int    id         = node.get("id").asInt();
-        final int    level      = node.get("level").asInt();
-        final String name       = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
-        final int    classId    = node.get("item_class").get("id").asInt();
-        final int    subClassId = node.get("item_subclass").get("id").asInt();
+        final int         id           = node.get("id").asInt();
+        final int         level        = node.get("level").asInt();
+        final String      name         = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
+        final int         classId      = node.get("item_class").get("id").asInt();
+        final int         subClassId   = node.get("item_subclass").get("id").asInt();
+        final ItemQuality quality      = ItemQuality.valueOf(node.get("quality").get("name").get("en_US").asText().replaceAll("\"", "").replaceAll("\'", "").replaceAll(" ", "_").toUpperCase());
 
-        return new Item(id, name, level, classId, subClassId);
+        return new Item(id, name, level, classId, subClassId, quality);
     }
 }

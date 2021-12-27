@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:paddingBottom="10dp">
+
+    <TextView
+        android:id="@+id/auctionItemId"
+        android:layout_height="wrap_content"
+        android:text="Id"
+        android:layout_width="wrap_content"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/auctionItemPriceGoldLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight=".4">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/auctionItemPriceGold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gold" />
+
+        <ImageView
+            android:id="@+id/auctionItemPriceGoldImg"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/coin_gold" />
+
+        <TextView
+            android:id="@+id/auctionItemPriceSilver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Silver" />
+
+        <ImageView
+            android:id="@+id/auctionItemPriceSilverImg"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/coin_silver" />
+
+        <TextView
+            android:id="@+id/auctionItemPriceCopper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Copper" />
+
+        <ImageView
+            android:id="@+id/auctionItemPriceCopperImg"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/coin_copper" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/auctionImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/auctionItemName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight=".5"
+        android:paddingStart="8dp"
+        android:text="Name" />
+
+    <TextView
+        android:id="@+id/auctionItemLevel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight=".1"
+        android:paddingRight="8dp"
+        android:textAlignment="textStart"
+        android:text="Lvl" />
+
+    <TextView
+        android:id="@+id/auctionItemQuantity"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight=".1"
+        android:textAlignment="textStart"
+        android:text="Qty" />
+</LinearLayout>

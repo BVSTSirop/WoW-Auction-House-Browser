@@ -1,11 +1,12 @@
 package ch.killenberger.wowauctionhousebrowser.ui;
 
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,9 +18,11 @@ import java.util.List;
 
 import ch.killenberger.wowauctionhousebrowser.AuctionDetailsActivity;
 import ch.killenberger.wowauctionhousebrowser.R;
-import ch.killenberger.wowauctionhousebrowser.model.auction.Auction;
+import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.auction.AuctionGroup;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
+import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
+import ch.killenberger.wowauctionhousebrowser.util.CurrencyUtil;
 
 /**
  * Provide views to RecyclerView with data from mDataSet.
@@ -30,11 +33,17 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        public TextView id;
-        public TextView price;
-        public TextView name;
-        public TextView level;
-        public TextView quantity;
+        public ImageView image;
+        public TextView  id;
+        public TextView  gold;
+        public ImageView goldImg;
+        public TextView  silver;
+        public ImageView silverImg;
+        public TextView  copper;
+        public ImageView copperImg;
+        public TextView  name;
+        public TextView  level;
+        public TextView  quantity;
 
 
         // We also create a constructor that accepts the entire item row
@@ -44,11 +53,17 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
             // to access the context from any ViewHolder instance.
             super(itemView);
 
-            id       = itemView.findViewById(R.id.auctionItemId);
-            price    = itemView.findViewById(R.id.auctionItemPrice);
-            name     = itemView.findViewById(R.id.auctionItemName);
-            level    = itemView.findViewById(R.id.auctionItemLevel);
-            quantity = itemView.findViewById(R.id.auctionItemQuantity);
+            image     = itemView.findViewById(R.id.auctionImage);
+            id        = itemView.findViewById(R.id.auctionItemId);
+            gold      = itemView.findViewById(R.id.auctionItemPriceGold);
+            goldImg   = itemView.findViewById(R.id.auctionItemPriceGoldImg);
+            silver    = itemView.findViewById(R.id.auctionItemPriceSilver);
+            silverImg = itemView.findViewById(R.id.auctionItemPriceSilverImg);
+            copper    = itemView.findViewById(R.id.auctionItemPriceCopper);
+            copperImg = itemView.findViewById(R.id.auctionItemPriceCopperImg);
+            name      = itemView.findViewById(R.id.auctionItemName);
+            level     = itemView.findViewById(R.id.auctionItemLevel);
+            quantity  = itemView.findViewById(R.id.auctionItemQuantity);
         }
     }
 
@@ -70,7 +85,7 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
-        View auctionView = inflater.inflate(R.layout.auctions_layout, parent, false);
+        View auctionView = inflater.inflate(R.layout.auction_groups_row_layout, parent, false);
 
         // Return a new holder instance
         ViewHolder viewHolder = new ViewHolder(auctionView);
@@ -101,22 +116,70 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
     @Override
     public void onBindViewHolder(AuctionsAdapter.ViewHolder holder, int position) {
         // Get the data model based on position
-        AuctionGroup auction = mAuction.get(position);
+        final AuctionGroup auction  = mAuction.get(position);
+        final Item         item     = auction.getItem();
+
+        DatabaseHelper db  = new DatabaseHelper(ApplicationSettings.getInstance().getApplicationContext());
+        final Bitmap   bmp = db.getImageByItemId(auction.getItem().getId());
+        db.close();
+
+        setPriceFields(auction.getLowestPrice(), holder);
+
+        ImageView img = holder.image;
+        img.setImageBitmap(bmp);
 
         TextView id = holder.id;
-        id.setText(String.valueOf(auction.getItem().getId()));
-
-        TextView price = holder.price;
-        price.setText(auction.getLowestPriceFormatted());
+        id.setText(String.valueOf(item.getId()));
 
         TextView name = holder.name;
-        name.setText(auction.getItem().getName());
+        name.setText(item.getName());
+        name.setTextColor(item.getQuality().getColor());
 
         TextView level = holder.level;
-        level.setText(String.valueOf(auction.getItem().getLevel()));
+        level.setText(String.valueOf(item.getLevel()));
 
         TextView quantity = holder.quantity;
         quantity.setText(String.valueOf(auction.getTotalQuantity()));
+    }
+
+    private void setPriceFields(final long price, AuctionsAdapter.ViewHolder holder) {
+        final long copperAmount = price % 100;
+        final long silverAmount = CurrencyUtil.copperToSilver(price) % 100;
+        final long goldAmount   = CurrencyUtil.copperToGold(price);
+
+        if(goldAmount == 0) {
+            holder.gold.setVisibility(View.GONE);
+            holder.goldImg.setVisibility(View.GONE);
+        } else {
+            holder.gold.setText(String.valueOf(goldAmount));
+
+            holder.gold.setVisibility(View.VISIBLE);
+            holder.goldImg.setVisibility(View.VISIBLE);
+        }
+
+        if(silverAmount == 0) {
+            holder.silver.setVisibility(View.GONE);
+            holder.silverImg.setVisibility(View.GONE);
+        } else {
+            holder.silver.setText(String.valueOf(silverAmount));
+
+            holder.silver.setVisibility(View.VISIBLE);
+            holder.silverImg.setVisibility(View.VISIBLE);
+        }
+
+        if(goldAmount == 0 && silverAmount == 0) {
+            holder.copper.setText(String.valueOf(price));
+        } else {
+            if(copperAmount == 0) {
+                holder.copper.setVisibility(View.GONE);
+                holder.copperImg.setVisibility(View.GONE);
+            } else {
+                holder.copper.setText(String.valueOf(copperAmount));
+
+                holder.copper.setVisibility(View.VISIBLE);
+                holder.copperImg.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     public void filter(final String name, final int classId, final int subClassId) {

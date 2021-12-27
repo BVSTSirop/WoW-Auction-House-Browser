@@ -16,6 +16,7 @@ public class AuctionGroup implements Comparable<AuctionGroup>, Parcelable {
     private final Item item;
 
     private List<Auction> auctions;
+    private long lowestPrice = Long.MAX_VALUE;
 
     public AuctionGroup(final Item item) {
         this(item, new ArrayList<>());
@@ -27,22 +28,13 @@ public class AuctionGroup implements Comparable<AuctionGroup>, Parcelable {
     }
 
     protected AuctionGroup(Parcel in) {
-        item     = in.readParcelable(Item.class.getClassLoader());
-        auctions = in.createTypedArrayList(Auction.CREATOR);
+        this.item        = in.readParcelable(Item.class.getClassLoader());
+        this.auctions    = in.createTypedArrayList(Auction.CREATOR);
+        this.lowestPrice = in.readLong();
     }
 
     public long getLowestPrice() {
-        long lowest = Long.MAX_VALUE;
-
-        for(Auction a : this.auctions) {
-            final long price = a.getPrice();
-
-            if(price < lowest) {
-                lowest = price;
-            }
-        }
-
-        return lowest;
+        return this.lowestPrice;
     }
 
     public boolean hasAucitonWithPrice(final long price) {
@@ -80,11 +72,19 @@ public class AuctionGroup implements Comparable<AuctionGroup>, Parcelable {
     }
 
     public void add(final Auction a) {
+        long price = a.getPrice();
+
+        if(price < this.lowestPrice) {
+            this.lowestPrice = price;
+        }
+
         auctions.add(a);
     }
 
     public void addAll(final Collection<Auction> auctions) {
-        auctions.addAll(auctions);
+        for(Auction a : auctions) {
+            add(a);
+        }
     }
 
     @Override
@@ -138,7 +138,8 @@ public class AuctionGroup implements Comparable<AuctionGroup>, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(item, flags);
-        dest.writeTypedList(auctions);
+        dest.writeParcelable(this.item, flags);
+        dest.writeTypedList(this.auctions);
+        dest.writeLong(this.lowestPrice);
     }
 }

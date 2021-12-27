@@ -5,25 +5,27 @@ import android.os.Parcelable;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import ch.killenberger.wowauctionhousebrowser.enums.ItemQuality;
 import ch.killenberger.wowauctionhousebrowser.jackson.ItemDeserializer;
 
 @JsonDeserialize(using = ItemDeserializer.class)
 public class Item implements Parcelable {
-    private int    id;
-    private String name;
-    private int    level;
-    private int    classId;
-    private int    subClassId;
-
+    private int         id;
+    private String      name;
+    private int         level;
+    private int         classId;
+    private int         subClassId;
+    private ItemQuality quality;
 
     public Item() { }
 
-    public Item(final int id, final String name, final int level, final int classId, final int subClassId) {
+    public Item(final int id, final String name, final int level, final int classId, final int subClassId, final ItemQuality quality) {
         this.id         = id;
         this.name       = name;
         this.level      = level;
         this.classId    = classId;
         this.subClassId = subClassId;
+        this.quality    = quality;
     }
 
     protected Item(Parcel in) {
@@ -32,6 +34,7 @@ public class Item implements Parcelable {
         this.level      = in.readInt();
         this.classId    = in.readInt();
         this.subClassId = in.readInt();
+        this.quality    = ItemQuality.valueOf(in.readString());
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -86,6 +89,14 @@ public class Item implements Parcelable {
         this.subClassId = subClassId;
     }
 
+    public ItemQuality getQuality() {
+        return quality;
+    }
+
+    public void setQuality(ItemQuality quality) {
+        this.quality = quality;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
@@ -109,5 +120,6 @@ public class Item implements Parcelable {
         dest.writeInt(this.level);
         dest.writeInt(this.classId);
         dest.writeInt(this.subClassId);
+        dest.writeString(this.quality.name());
     }
 }

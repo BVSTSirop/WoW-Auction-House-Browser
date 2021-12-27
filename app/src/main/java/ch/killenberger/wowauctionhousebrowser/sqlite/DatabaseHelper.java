@@ -5,11 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import ch.killenberger.wowauctionhousebrowser.enums.ItemQuality;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemSubClass;
@@ -28,11 +31,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_ITEM           = "ITEM";
     private static final String TABLE_ITEM_CLASS     = "ITEM_CLASS";
     private static final String TABLE_ITEM_SUB_CLASS = "ITEM_SUB_CLASS";
+    private static final String TABLE_ITEM_MEDIA     = "ITEM_MEDIA";
 
     // Common column names
     private static final String COL_ID = "ID";
     private static final String COL_NAME     = "NAME";
     private static final String COL_CLASS_ID = "CLASS_ID";
+    private static final String COL_ITEM_ID  = "ITEM_ID";
+    private static final String COL_QUALITY  = "QUALITY";
+    private static final String COL_IMAGE    = "IMAGE";
 
     // ITEM Table - column names
     private static final String COL_ITEM_LEVEL = "LEVEL";
@@ -41,29 +48,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COL_SUB_CLASS_ID = "SUB_CLASS_ID";
 
     // Table Create Statements
-    private static final String CREATE_TABLE_ITEM = "CREATE TABLE " +
+    private static final String CREATE_TABLE_ITEM = "CREATE TABLE IF NOT EXISTS " +
             TABLE_ITEM + "(" +
-            COL_ID + " INTEGER PRIMARY KEY," +
+                COL_ID           + " INTEGER PRIMARY KEY," +
                 COL_NAME         + " TEXT," +
                 COL_ITEM_LEVEL   + " INTEGER," +
                 COL_CLASS_ID     + " INTEGER," +
                 COL_SUB_CLASS_ID + " INTEGER," +
-                " FOREIGN KEY (" + COL_CLASS_ID + ") REFERENCES " + TABLE_ITEM_CLASS + " (ID)," +
-                " FOREIGN KEY (" + COL_SUB_CLASS_ID + ") REFERENCES " + TABLE_ITEM_SUB_CLASS + " (ID))";
+                COL_QUALITY      + " TEXT," +
+                " FOREIGN KEY (" + COL_CLASS_ID + ") REFERENCES " + TABLE_ITEM_CLASS  + " (" + COL_ID +")," +
+                " FOREIGN KEY (" + COL_SUB_CLASS_ID + ") REFERENCES " + TABLE_ITEM_SUB_CLASS + " (" + COL_ID +"))";
 
     // Tag table create statement
-    private static final String CREATE_TABLE_ITEM_CLASS = "CREATE TABLE " +
+    private static final String CREATE_TABLE_ITEM_CLASS = "CREATE TABLE IF NOT EXISTS " +
             TABLE_ITEM_CLASS + "(" +
             COL_ID + " INTEGER PRIMARY KEY," +
                 COL_NAME + " TEXT)";
 
     // Tag table create statement
-    private static final String CREATE_TABLE_ITEM_SUB_CLASS = "CREATE TABLE " +
+    private static final String CREATE_TABLE_ITEM_SUB_CLASS = "CREATE TABLE IF NOT EXISTS " +
             TABLE_ITEM_SUB_CLASS + "(" +
-            COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                COL_ID           + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 COL_SUB_CLASS_ID + " INTEGER," +
                 COL_NAME         + " TEXT," +
-                COL_CLASS_ID     + " INTEGER, FOREIGN KEY (" + COL_CLASS_ID + ") REFERENCES " + TABLE_ITEM_SUB_CLASS + " (ID))";
+                COL_CLASS_ID     + " INTEGER, " +
+                "FOREIGN KEY (" + COL_CLASS_ID + ") REFERENCES " + TABLE_ITEM_SUB_CLASS + " (" + COL_ID +"))";
+
+    private static final String CREATE_TABLE_ITEM_MEDIA = "CREATE TABLE IF NOT EXISTS " +
+        TABLE_ITEM_MEDIA + "(" +
+            COL_ITEM_ID + " INTEGER PRIMARY KEY, " +
+            COL_IMAGE   + " BLOB, " +
+            "FOREIGN KEY (" + COL_ITEM_ID + ") REFERENCES " + TABLE_ITEM + " (" + COL_ID +"))";
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -75,6 +91,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_ITEM_CLASS);
         db.execSQL(CREATE_TABLE_ITEM_SUB_CLASS);
         db.execSQL(CREATE_TABLE_ITEM);
+        db.execSQL(CREATE_TABLE_ITEM_MEDIA);
     }
 
     @Override
@@ -89,14 +106,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        System.out.println("Creating item: " + i);
-
         ContentValues values = new ContentValues();
         values.put(COL_ID,           i.getId());
         values.put(COL_NAME,         i.getName());
         values.put(COL_ITEM_LEVEL,   i.getLevel());
         values.put(COL_CLASS_ID,     i.getClassId());
         values.put(COL_SUB_CLASS_ID, i.getSubClassId());
+        values.put(COL_QUALITY,      i.getQuality().name());
 
         return db.insert(TABLE_ITEM, null, values);
     }
@@ -114,6 +130,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     values.put(COL_ITEM_LEVEL,   i.getLevel());
                     values.put(COL_CLASS_ID,     i.getClassId());
                     values.put(COL_SUB_CLASS_ID, i.getSubClassId());
+                    values.put(COL_QUALITY,      i.getQuality().name());
 
                     db.insert(TABLE_ITEM, null, values);
 
@@ -135,22 +152,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final Cursor c = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list
-        if (c.moveToFirst()) {
+        if (c != null && c.moveToFirst()) {
             do {
-                final String name       = c.getString(c.getColumnIndex(COL_NAME));
-                final int    id         = c.getInt((c.getColumnIndex(COL_ID)));
-                final int    level      = c.getInt(c.getColumnIndex(COL_ITEM_LEVEL));
-                final int    classId    = c.getInt((c.getColumnIndex(COL_CLASS_ID)));
-                final int    subClassId = c.getInt((c.getColumnIndex(COL_SUB_CLASS_ID)));
+                final String      name       = c.getString(c.getColumnIndex(COL_NAME));
+                final int         id         = c.getInt((c.getColumnIndex(COL_ID)));
+                final int         level      = c.getInt(c.getColumnIndex(COL_ITEM_LEVEL));
+                final int         classId    = c.getInt((c.getColumnIndex(COL_CLASS_ID)));
+                final int         subClassId = c.getInt((c.getColumnIndex(COL_SUB_CLASS_ID)));
+                final ItemQuality quality    = ItemQuality.valueOf(c.getString(c.getColumnIndex(COL_QUALITY)));
 
-                Item i = new Item();
-                i.setId(id);
-                i.setName(name);
-                i.setLevel(level);
-                i.setClassId(classId);
-                i.setSubClassId(subClassId);
-
-                items.add(i);
+                items.add(new Item(id, name, level, classId, subClassId, quality));
             } while (c.moveToNext());
         }
 
@@ -165,19 +176,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor c = db.rawQuery(selectQuery, null);
 
         if(c != null && c.moveToFirst() ) {
-            final String name       = c.getString(c.getColumnIndex(COL_NAME));
-            final int    level      = c.getInt(c.getColumnIndex(COL_ITEM_LEVEL));
-            final int    classId    = c.getInt((c.getColumnIndex(COL_CLASS_ID)));
-            final int    subClassId = c.getInt((c.getColumnIndex(COL_SUB_CLASS_ID)));
+            final String      name       = c.getString(c.getColumnIndex(COL_NAME));
+            final int         level      = c.getInt(c.getColumnIndex(COL_ITEM_LEVEL));
+            final int         classId    = c.getInt((c.getColumnIndex(COL_CLASS_ID)));
+            final int         subClassId = c.getInt((c.getColumnIndex(COL_SUB_CLASS_ID)));
+            final ItemQuality quality    = ItemQuality.valueOf(c.getString(c.getColumnIndex(COL_QUALITY)));
 
-            Item i = new Item();
-            i.setId(id);
-            i.setName(name);
-            i.setLevel(level);
-            i.setClassId(classId);
-            i.setSubClassId(subClassId);
-
-            return i;
+            return new Item(id, name, level, classId, subClassId, quality);
         }
 
         return new Item();
@@ -197,8 +202,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public int getHighestItemClassId() {
-        final SQLiteDatabase db = this.getReadableDatabase();
-        final String query = "SELECT * FROM " + TABLE_ITEM_CLASS + " ORDER BY " + COL_ID + " DESC LIMIT 0, 1";
+        final SQLiteDatabase db    = this.getReadableDatabase();
+        final String         query = "SELECT * FROM " + TABLE_ITEM_CLASS + " ORDER BY " + COL_ID + " DESC LIMIT 0, 1";
 
         Cursor c = db.rawQuery(query, null);
 
@@ -207,6 +212,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return -1;
+    }
+
+    public int getHighestItemMediaItemId() {
+        final SQLiteDatabase db    = this.getReadableDatabase();
+        final String         query = "SELECT * FROM " + TABLE_ITEM_MEDIA + " ORDER BY " + COL_ITEM_ID + " DESC LIMIT 0, 1";
+
+        Cursor c = db.rawQuery(query, null);
+
+        if (c != null && c.moveToFirst()) {
+            return c.getInt(c.getColumnIndex(COL_ITEM_ID));
+        }
+
+        return -1;
+    }
+
+    public List<Integer> getItemIds() {
+        final SQLiteDatabase db     = this.getReadableDatabase();
+        final String         query  = "SELECT " + COL_ID + " FROM " + TABLE_ITEM + " ORDER BY " + COL_ID + " ASC";
+        final List<Integer>  result = new ArrayList<>();
+
+        Cursor c = db.rawQuery(query, null);
+
+        if (c != null && c.moveToFirst()) {
+            do {
+                result.add(c.getInt(c.getColumnIndex(COL_ID)));
+            } while (c.moveToNext());
+        }
+
+        c.close();
+
+        return result;
     }
 
     public int getHighestItemSubClassId(final int parentId) {
@@ -220,6 +256,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return -1;
+    }
+
+    public List<Integer> getMissingItemMediaIds() {
+        final SQLiteDatabase db     = this.getReadableDatabase();
+        final String         query  = "SELECT i." + COL_ID + " FROM " + TABLE_ITEM + " i LEFT JOIN " + TABLE_ITEM_MEDIA + " im ON i." + COL_ID + " = im." + COL_ITEM_ID + " WHERE im." + COL_ITEM_ID + " IS NULL ORDER BY i." + COL_ID + " ASC";
+        final List<Integer>  result = new ArrayList<>();
+
+        Cursor c = db.rawQuery(query, null);
+
+        if (c != null && c.moveToFirst()) {
+            do {
+                result.add(c.getInt(c.getColumnIndex(COL_ID)));
+            } while (c.moveToNext());
+        }
+
+        return result;
     }
 
     public long createItemClass(ItemClass ic) {
@@ -302,9 +354,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_NAME,     isc.getName());
         values.put(COL_CLASS_ID, isc.getParentClassId());
 
-        final long result = db.insert(TABLE_ITEM_SUB_CLASS, null, values);
-
-        return result;
+        return db.insert(TABLE_ITEM_SUB_CLASS, null, values);
     }
 
     public void createItemSubClasses(final List<ItemSubClass> subClasses) {
@@ -332,9 +382,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<ItemSubClass> getSubClassesByParentId(final int id) {
-        final SQLiteDatabase  db          = this.getReadableDatabase();
+        final SQLiteDatabase     db          = this.getReadableDatabase();
         final List<ItemSubClass> subClasses  = new ArrayList<>();
-        final String          selectQuery = "SELECT  * FROM " + TABLE_ITEM_SUB_CLASS + " WHERE " + COL_CLASS_ID + " = " + id;
+        final String             selectQuery = "SELECT  * FROM " + TABLE_ITEM_SUB_CLASS + " WHERE " + COL_CLASS_ID + " = " + id;
 
         Cursor c = db.rawQuery(selectQuery, null);
         if(c != null && c.moveToFirst() ) {
@@ -348,7 +398,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (c.moveToNext());
         }
 
+        c.close();
+
         return subClasses;
+    }
+
+    public long createItemMedia(final int itemId, final byte[] image) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COL_ITEM_ID, itemId);
+        values.put(COL_IMAGE,   image);
+
+        return db.insert(TABLE_ITEM_MEDIA, null, values);
+    }
+
+    public Bitmap getImageByItemId(final int itemId) {
+        final SQLiteDatabase db    = this.getReadableDatabase();
+        final String         query = "SELECT " + COL_IMAGE + " FROM " + TABLE_ITEM_MEDIA + " WHERE " + COL_ITEM_ID + " = " + itemId;
+
+        Cursor c = db.rawQuery(query, null);
+
+        if(c != null && c.moveToFirst() ) {
+            byte[] image = c.getBlob(0);
+
+            return BitmapFactory.decodeByteArray(image, 0, image.length);
+        }
+
+        return null;
     }
 
     public void close() {
@@ -360,6 +437,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void dropTables() {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        //db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_MEDIA);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_SUB_CLASS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_CLASS);

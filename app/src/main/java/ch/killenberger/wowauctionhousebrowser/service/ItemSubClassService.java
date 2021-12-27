@@ -1,16 +1,20 @@
 package ch.killenberger.wowauctionhousebrowser.service;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import ch.killenberger.wowauctionhousebrowser.R;
 import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
@@ -18,8 +22,23 @@ import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemSubClass;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
+import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class ItemSubClassService extends AsyncTask<String, Void, List<ItemSubClass>> {
+    private final Context mContext;
+
+    private ProgressDialog dialog;
+
+    private Exception exception;
+
+    public ItemSubClassService(Context context) {
+        this.mContext = context;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        this.dialog = ProgressDialog.show(mContext,"Downloading", "Downloading Item SubClasses...");
+    }
 
     @Override
     protected List<ItemSubClass> doInBackground(String... strings) {
@@ -44,8 +63,10 @@ public class ItemSubClassService extends AsyncTask<String, Void, List<ItemSubCla
                 result.addAll(subClasses);
 
                 db.createItemSubClasses(subClasses);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                this.exception = e;
+
+                break;
             }
         }
 
@@ -66,5 +87,18 @@ public class ItemSubClassService extends AsyncTask<String, Void, List<ItemSubCla
         }
 
         return subClasses;
+    }
+
+    @Override
+    protected void onPostExecute(List<ItemSubClass> subClasses) {
+        super.onPostExecute(subClasses);
+
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+
+        if(exception != null) {
+            AlertUtil.createAlertDialog(this.mContext, "Oops", this.mContext.getString(R.string.connection_failed_error_msg));
+        }
     }
 }

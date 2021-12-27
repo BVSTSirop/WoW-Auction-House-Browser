@@ -1,5 +1,6 @@
 package ch.killenberger.wowauctionhousebrowser.service;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import ch.killenberger.wowauctionhousebrowser.R;
 import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
@@ -19,8 +21,17 @@ import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemSubClass;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
+import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class ItemSubClassUpdateService extends AsyncTask<String, Void, Boolean> {
+
+    private final Context mContext;
+
+    private Exception exception;
+
+    public ItemSubClassUpdateService(final Context c) {
+        this.mContext = c;
+    }
 
     @Override
     protected Boolean doInBackground(String... strings) {
@@ -38,15 +49,24 @@ public class ItemSubClassUpdateService extends AsyncTask<String, Void, Boolean> 
             try {
                 ItemSubClass subClass = parseResponse(HttpGetClient.call(endpoint));
 
-                if (subClass.getId() < db.getHighestItemSubClassId(subClass.getParentClassId())) {
+                if (db.getHighestItemSubClassId(subClass.getParentClassId()) < subClass.getId()) {
                     return true;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                this.exception = e;
             }
         }
 
         return false;
+    }
+
+    @Override
+    protected void onPostExecute(Boolean aBoolean) {
+        super.onPostExecute(aBoolean);
+
+        if(exception != null) {
+            AlertUtil.createAlertDialog(this.mContext, "Oops", this.mContext.getString(R.string.connection_failed_error_msg));
+        }
     }
 
     private ItemSubClass parseResponse(final String resp) throws JsonProcessingException {

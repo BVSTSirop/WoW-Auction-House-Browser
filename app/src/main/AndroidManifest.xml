@@ -17,17 +17,25 @@
         <activity android:name=".AuctionDetailsActivity" />
 
         <activity
-            android:name=".AuctionsActivity"
-            android:label="@string/title_activity_auctions" />
-        <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.WoWAuctionHouseBrowser.NoActionBar">
+            android:theme="@style/Theme.WoWAuctionHouseBrowser.NoActionBar"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action   android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".AuctionsActivity"
+            android:label="@string/title_activity_auctions"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"/>
+
+        <activity android:name=".AuctionDetailsActivity"
+                  android:screenOrientation="portrait"
+                  android:parentActivityName=".AuctionsActivity"/>
     </application>
 
 </manifest>

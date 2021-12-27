@@ -1,5 +1,9 @@
 package ch.killenberger.wowauctionhousebrowser.service;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,12 +21,21 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Base64;
 
+import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.oauth2.AccessToken;
+import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
-public class OAuth2Service extends AsyncTask<String, Void, AccessToken> {
+public class OAuth2Service extends AsyncTask<String, Void, Void> {
+    private final Context mContext;
+
+    private Exception exception;
+
+    public OAuth2Service(final Context c) {
+        this.mContext = c;
+    }
 
     @Override
-    protected AccessToken doInBackground(String... urls) {
+    protected Void doInBackground(String... urls) {
         final String endpoint = "https://eu.battle.net/oauth/token";
         final String user     = "3478c563948b43849e053b7d629ac2e9";
         final String secret   = "b03xb6VD9S53XhKIJVDiuWd0KG3eeS2Y";
@@ -57,12 +70,13 @@ public class OAuth2Service extends AsyncTask<String, Void, AccessToken> {
 
                 connection.disconnect();
 
-                return parseResponse(response.toString());
+                ApplicationSettings.getInstance().setAccessToken(parseResponse(response.toString()));
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            this.exception = e;
         }
+
+        return null;
     }
 
     private String createBase64Credentials(final String user, final String secret) {
