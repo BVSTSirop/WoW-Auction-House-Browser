@@ -33,6 +33,7 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v2.7.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: ls -la
       - name: Create Pre-Release
         id: create_pre_release
         uses: actions/create-release@v1
