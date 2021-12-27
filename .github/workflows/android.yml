@@ -1,27 +1,64 @@
-name: Build & Publish Debug APK
+name: Minimal Android CI Workflow
 
 on:
- push:
-  branches:
-   - master
-   
+  push:
+    branches:
+      - master
+
 jobs:
-  build:
+  test:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup JDK
         uses: actions/setup-java@v1
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
-      - name: Build with Gradle
-        run: ./gradlew build
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
-      - name: Releasing using Hub
-        uses: ShaunLWM/action-release-debugapk@master
+        with:
+          java-version: 1.8
+      - name: Run Tests
+        run: bash ./gradlew test --stacktrace  
+  apk:
+    name: Generate APK
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build APK
+        run: bash ./gradlew assembleDebug --stacktrace
+      - name: Upload APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: apk
+          path: app/build/outputs/apk/debug/app-debug.apk 
+  release:
+    name: Release APK
+    needs: apk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK from build
+        uses: actions/download-artifact@v1
+        with:
+          name: apk  
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-         GITHUB_TOKEN: ${{ secrets.TOKEN }}
-         APP_FOLDER: app
-         RELEASE_TITLE: WoW Auction House Browser
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} 
+        with:
+          release_name: WoW Auction House Browser
+      - name: Upload Release APK
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: apk/app-debug.apk
+          asset_name: MensaApp.apk
+          asset_content_type: application/zip
