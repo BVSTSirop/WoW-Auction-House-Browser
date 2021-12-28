@@ -4,42 +4,32 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
 import ch.killenberger.wowauctionhousebrowser.R;
-import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
-import ch.killenberger.wowauctionhousebrowser.model.item.Item;
+import ch.killenberger.wowauctionhousebrowser.runnable.ImageDownloadThread;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class ItemMediaService extends AsyncTask<String, Integer, Void> {
-    private static final String VALUE_START = "\"value\":\"";
-    private static final String VALUE_END   = "\",";
-
-    private final Context        mContext;
-    private       ProgressDialog dialog;
+    private final static int MIN_IMAGES_PER_THREAD = 50;
 
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
+    private final Context        mContext;
     private final Locale              locale      = appSettings.getLocale();
     private final Region              region      = UserSettings.getInstance().getRegion();
 
-    private Exception exception;
+    private ProgressDialog dialog;
+    private Exception      exception;
 
     public ItemMediaService(final Context c) {
         this.mContext = c;
@@ -55,25 +45,7 @@ public class ItemMediaService extends AsyncTask<String, Integer, Void> {
         final DatabaseHelper db = new DatabaseHelper(ApplicationSettings.getInstance().getApplicationContext());
         final List<Integer>  ids        = db.getMissingItemMediaIds();
 
-        for(int id : ids) {
-            String response = "";
-            try {
-                response = HttpGetClient.call(assembleURl(id));
-            } catch (IOException e) {
-                this.exception = e;
-
-                break;
-            }
-
-            try {
-                String mediaLink = response.substring(response.indexOf(VALUE_START) + VALUE_START.length());
-                mediaLink = mediaLink.substring(0, mediaLink.indexOf(VALUE_END));
-
-                db.createItemMedia(id, downloadImage(mediaLink));
-            } catch (StringIndexOutOfBoundsException e) {
-                System.out.println("No media found for item with: " + id);
-            }
-        }
+        startDownloadThreads(MIN_IMAGES_PER_THREAD, ids);
 
         db.close();
 
@@ -93,34 +65,30 @@ public class ItemMediaService extends AsyncTask<String, Integer, Void> {
         }
     }
 
-    private String assembleURl(final int id) {
-        return this.region.getHost() + "/data/wow/media/item/" + id + "?namespace=" + this.region.getStaticNamespace() + "&locale=" + this.locale.toString() + "&access_token=" + ApplicationSettings.getInstance().getAccessToken().getToken();
-    }
+    private List<ImageDownloadThread> startDownloadThreads(final int minImagesPerThread, final List<Integer> ids) {
+        final List<ImageDownloadThread> threads = new ArrayList<>();
 
-    private byte[] downloadImage(final String link) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            URL url = new URL(link);
-
-            try (InputStream is = url.openStream ()) {
-                byte[] byteChunk = new byte[4096];
-                int n;
-
-                while ((n = is.read(byteChunk)) > 0) {
-                    baos.write(byteChunk, 0, n);
-                }
-
-                return baos.toByteArray();
-            } catch (IOException e) {
-                System.err.printf ("Failed while reading bytes from %s: %s", url.toExternalForm(), e.getMessage());
-                e.printStackTrace ();
-            }
-        } catch (IOException e) {
-            System.err.printf ("Failed while reading bytes from %s: %s", link, e.getMessage());
-            e.printStackTrace ();
-            // Perform any other exception handling that's appropriate.
+        int threadsNeeded = ids.size() / minImagesPerThread;
+        if(ids.size() % minImagesPerThread > 0) {
+            threadsNeeded++;
         }
 
-        return new byte[]{};
+        for(int i = 0; i < threadsNeeded; i++) {
+            int startIndex = i * minImagesPerThread;
+
+            int endIndex;
+            if(startIndex + minImagesPerThread < ids.size()) {
+                endIndex = startIndex + minImagesPerThread;
+            } else {
+                endIndex = ids.size() - 1;
+            }
+
+            ImageDownloadThread t = new ImageDownloadThread(this.region, this.locale, ids.subList(startIndex, endIndex));
+            t.start();
+
+            threads.add(t);
+        }
+
+        return threads;
     }
 }
