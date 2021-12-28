@@ -2,6 +2,7 @@ package ch.killenberger.wowauctionhousebrowser.service;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.media.Image;
 import android.os.AsyncTask;
 
 import java.io.ByteArrayOutputStream;
@@ -45,7 +46,11 @@ public class ItemMediaService extends AsyncTask<String, Integer, Void> {
         final DatabaseHelper db = new DatabaseHelper(ApplicationSettings.getInstance().getApplicationContext());
         final List<Integer>  ids        = db.getMissingItemMediaIds();
 
-        startDownloadThreads(MIN_IMAGES_PER_THREAD, ids);
+        List<ImageDownloadThread> generatedThreads = startDownloadThreads(MIN_IMAGES_PER_THREAD, ids);
+
+        while(hasAliveThreads(generatedThreads)) {
+            // still downloading
+        }
 
         db.close();
 
@@ -63,6 +68,16 @@ public class ItemMediaService extends AsyncTask<String, Integer, Void> {
         if(exception != null) {
             AlertUtil.createAlertDialog(this.mContext, "Oops", this.mContext.getString(R.string.connection_failed_error_msg));
         }
+    }
+
+    public boolean hasAliveThreads(final List<ImageDownloadThread> threads) {
+        for(Thread t : threads) {
+            if(t.isAlive()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private List<ImageDownloadThread> startDownloadThreads(final int minImagesPerThread, final List<Integer> ids) {
