@@ -16,3 +16,4 @@ local.properties
 *.apk
 app/release/output-metadata.json
 app/src/main/assets/WOWAUCTIONBROWSER
+.idea/sonarlint/**
