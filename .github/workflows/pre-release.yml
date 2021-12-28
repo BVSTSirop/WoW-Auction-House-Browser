@@ -28,13 +28,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
       - name: Build APK
         run: bash ./gradlew assembleDebug
-      - name: "Build Changelog"
-        id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v2.7.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S%3N')"
@@ -47,7 +47,7 @@ jobs:
           tag_name: dev-build-${{ steps.date.outputs.date }}
           release_name: dev-build-${{ steps.date.outputs.date }}
           body: |
-            ${{ steps.build_changelog.outputs.changelog }}
+            ${{ steps.Changelog.outputs.changelog }}
           draft: false
           prerelease: true
       - name: Upload Release Asset
