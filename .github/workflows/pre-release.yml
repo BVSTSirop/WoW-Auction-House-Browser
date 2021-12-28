@@ -44,7 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: dev-build
+          tag_name: dev-build-${{ steps.date.outputs.date }}
           release_name: dev-build-${{ steps.date.outputs.date }}
           body: |
             ${{ steps.build_changelog.outputs.changelog }}
