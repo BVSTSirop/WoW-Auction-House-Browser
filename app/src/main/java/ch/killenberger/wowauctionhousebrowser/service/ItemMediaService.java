@@ -22,7 +22,7 @@ import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class ItemMediaService extends AsyncTask<String, Integer, Void> {
-    private final static int MIN_IMAGES_PER_THREAD = 200;
+    private final static int MIN_IMAGES_PER_THREAD = 1000;
 
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
     private final Locale              locale      = appSettings.getLocale();
