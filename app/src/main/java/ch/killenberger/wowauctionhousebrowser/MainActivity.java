@@ -208,7 +208,15 @@ public class MainActivity extends AppCompatActivity {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final boolean itemMediaUpdateRequired = new ItemMediaUpdateService().execute().get();
+                boolean itemMediaUpdateRequired = false;
+
+                try {
+                    itemMediaUpdateRequired = new ItemMediaUpdateService().execute().get();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+
                 if(itemMediaUpdateRequired) {
                     fetchItemMedia();
                 }
