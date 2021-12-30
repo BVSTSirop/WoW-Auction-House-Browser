@@ -22,12 +22,12 @@ import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class ItemMediaService extends AsyncTask<String, Integer, Void> {
-    private final static int MIN_IMAGES_PER_THREAD = 200;
+    private final static int MIN_IMAGES_PER_THREAD = 50;
 
     private final ApplicationSettings appSettings = ApplicationSettings.getInstance();
+    private final Context        mContext;
     private final Locale              locale      = appSettings.getLocale();
     private final Region              region      = UserSettings.getInstance().getRegion();
-    private final Context             mContext;
 
     private ProgressDialog dialog;
     private Exception      exception;
@@ -87,8 +87,6 @@ public class ItemMediaService extends AsyncTask<String, Integer, Void> {
         if(ids.size() % minImagesPerThread > 0) {
             threadsNeeded++;
         }
-
-        System.out.println("Starting " + threadsNeeded + " threads to download " + ids.size() + " images");
 
         for(int i = 0; i < threadsNeeded; i++) {
             int startIndex = i * minImagesPerThread;

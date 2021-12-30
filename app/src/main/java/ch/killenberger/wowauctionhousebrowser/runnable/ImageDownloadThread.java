@@ -31,12 +31,13 @@ public class ImageDownloadThread extends Thread {
         final DatabaseHelper db = new DatabaseHelper(ApplicationSettings.getInstance().getApplicationContext());
 
         for(int id : ids) {
-            System.out.println("Downloading: " + id);
             String response = null;
             try {
                 response = HttpGetClient.call(assembleURl(id));
             } catch (IOException e) {
-                continue;
+                e.printStackTrace();
+
+                break;
             }
 
             try {

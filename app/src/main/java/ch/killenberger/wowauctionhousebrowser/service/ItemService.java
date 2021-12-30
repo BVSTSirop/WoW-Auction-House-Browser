@@ -39,7 +39,7 @@ public class ItemService extends AsyncTask<String, Integer, List<Item>> {
 
     @Override
     protected void onPreExecute() {
-        this.dialog = ProgressDialog.show(this.mContext,"Downloading", "Fetching item assets...");
+        this.dialog = ProgressDialog.show(mContext,"Downloading", "Fetching item assets...");
     }
 
     @Override
