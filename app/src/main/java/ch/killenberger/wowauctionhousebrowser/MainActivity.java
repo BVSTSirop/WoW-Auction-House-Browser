@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                 os.flush();
             }
         } catch (IOException e){
-            Log.e("DATABASE", "FAILED TO COPY DATABAE TO DATA DIR");
+            Log.e("DATABASE", "FAILED TO COPY DATABASE TO DATA DIR");
         }
     }
 }
