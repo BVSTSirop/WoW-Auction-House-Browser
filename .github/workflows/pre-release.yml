@@ -30,8 +30,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: LFS install
-        run: git lfs install
+          lsf: true
+      - name: Checkout LFS objects
+        run: git lfs checkout
       - name: Changelog
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
