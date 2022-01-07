@@ -31,6 +31,8 @@ jobs:
         with:
           fetch-depth: 0
           lsf: true
+      - name: LFS pull
+        run: git lfs pull
       - name: Checkout LFS objects
         run: git lfs checkout
       - name: Changelog
