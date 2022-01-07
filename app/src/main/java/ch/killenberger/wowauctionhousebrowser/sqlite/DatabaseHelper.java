@@ -163,6 +163,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 items.add(new Item(id, name, level, classId, subClassId, quality));
             } while (c.moveToNext());
+
+            c.close();
         }
 
         return items;
@@ -173,7 +175,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String selectQuery = "SELECT  * FROM " + TABLE_ITEM + " WHERE " + COL_ID + " = " + id;
 
-        Cursor c = db.rawQuery(selectQuery, null);
+        final Cursor c = db.rawQuery(selectQuery, null);
 
         if(c != null && c.moveToFirst() ) {
             final String      name       = c.getString(c.getColumnIndex(COL_NAME));
@@ -181,6 +183,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             final int         classId    = c.getInt((c.getColumnIndex(COL_CLASS_ID)));
             final int         subClassId = c.getInt((c.getColumnIndex(COL_SUB_CLASS_ID)));
             final ItemQuality quality    = ItemQuality.valueOf(c.getString(c.getColumnIndex(COL_QUALITY)));
+
+            c.close();
 
             return new Item(id, name, level, classId, subClassId, quality);
         }
@@ -192,10 +196,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final SQLiteDatabase db = this.getReadableDatabase();
         final String query = "SELECT * FROM " + TABLE_ITEM + " ORDER BY " + COL_ID + " DESC LIMIT 0, 1";
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if (c != null && c.moveToFirst()) {
-            return c.getInt(c.getColumnIndex(COL_ID));
+            final int id = c.getInt(c.getColumnIndex(COL_ID));
+
+            c.close();
+
+            return id;
         }
 
         return -1;
@@ -205,10 +213,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final SQLiteDatabase db    = this.getReadableDatabase();
         final String         query = "SELECT * FROM " + TABLE_ITEM_CLASS + " ORDER BY " + COL_ID + " DESC LIMIT 0, 1";
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if (c != null && c.moveToFirst()) {
-            return c.getInt(c.getColumnIndex(COL_ID));
+            final int id = c.getInt(c.getColumnIndex(COL_ID));
+
+            c.close();
+
+            return id;
         }
 
         return -1;
@@ -218,10 +230,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final SQLiteDatabase db    = this.getReadableDatabase();
         final String         query = "SELECT * FROM " + TABLE_ITEM_MEDIA + " ORDER BY " + COL_ITEM_ID + " DESC LIMIT 0, 1";
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if (c != null && c.moveToFirst()) {
-            return c.getInt(c.getColumnIndex(COL_ITEM_ID));
+            final int id = c.getInt(c.getColumnIndex(COL_ITEM_ID));
+
+            c.close();
+
+            return id;
         }
 
         return -1;
@@ -232,15 +248,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final String         query  = "SELECT " + COL_ID + " FROM " + TABLE_ITEM + " ORDER BY " + COL_ID + " ASC";
         final List<Integer>  result = new ArrayList<>();
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if (c != null && c.moveToFirst()) {
             do {
                 result.add(c.getInt(c.getColumnIndex(COL_ID)));
             } while (c.moveToNext());
-        }
 
-        c.close();
+            c.close();
+        }
 
         return result;
     }
@@ -249,10 +265,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final SQLiteDatabase db = this.getReadableDatabase();
         final String query = "SELECT * FROM " + TABLE_ITEM_SUB_CLASS + " WHERE " + COL_CLASS_ID + " = " + parentId + " ORDER BY " + COL_SUB_CLASS_ID + " DESC LIMIT 0, 1";
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if (c != null && c.moveToFirst()) {
-            return c.getInt(c.getColumnIndex(COL_SUB_CLASS_ID));
+            final int id = c.getInt(c.getColumnIndex(COL_SUB_CLASS_ID));
+
+            c.close();
+
+            return id;
         }
 
         return -1;
@@ -263,12 +283,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final String         query  = "SELECT i." + COL_ID + " FROM " + TABLE_ITEM + " i LEFT JOIN " + TABLE_ITEM_MEDIA + " im ON i." + COL_ID + " = im." + COL_ITEM_ID + " WHERE im." + COL_ITEM_ID + " IS NULL ORDER BY i." + COL_ID + " ASC";
         final List<Integer>  result = new ArrayList<>();
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if (c != null && c.moveToFirst()) {
             do {
                 result.add(c.getInt(c.getColumnIndex(COL_ID)));
             } while (c.moveToNext());
+
+            c.close();
         }
 
         return result;
@@ -324,6 +346,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 classes.add(ic);
             } while (c.moveToNext());
+
+            c.close();
         }
 
         return classes;
@@ -334,11 +358,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String selectQuery = "SELECT  * FROM " + TABLE_ITEM_CLASS + " WHERE " + COL_ID + " = " + id;
 
-        Cursor c = db.rawQuery(selectQuery, null);
+        final Cursor c = db.rawQuery(selectQuery, null);
         if(c != null && c.moveToFirst() ) {
             ItemClass ic = new ItemClass();
             ic.setId(c.getInt((c.getColumnIndex(COL_ID))));
             ic.setName((c.getString(c.getColumnIndex(COL_NAME))));
+
+            c.close();
 
             return ic;
         }
@@ -386,7 +412,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final List<ItemSubClass> subClasses  = new ArrayList<>();
         final String             selectQuery = "SELECT  * FROM " + TABLE_ITEM_SUB_CLASS + " WHERE " + COL_CLASS_ID + " = " + id;
 
-        Cursor c = db.rawQuery(selectQuery, null);
+        final Cursor c = db.rawQuery(selectQuery, null);
         if(c != null && c.moveToFirst() ) {
             do {
                 ItemSubClass isc = new ItemSubClass();
@@ -396,9 +422,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 subClasses.add(isc);
             } while (c.moveToNext());
-        }
 
-        c.close();
+            c.close();
+        }
 
         return subClasses;
     }
@@ -417,10 +443,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         final SQLiteDatabase db    = this.getReadableDatabase();
         final String         query = "SELECT " + COL_IMAGE + " FROM " + TABLE_ITEM_MEDIA + " WHERE " + COL_ITEM_ID + " = " + itemId;
 
-        Cursor c = db.rawQuery(query, null);
+        final Cursor c = db.rawQuery(query, null);
 
         if(c != null && c.moveToFirst() ) {
             byte[] image = c.getBlob(0);
+
+            c.close();
 
             return BitmapFactory.decodeByteArray(image, 0, image.length);
         }
