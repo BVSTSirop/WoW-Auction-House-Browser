@@ -25,7 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 3;
 
     // Database Name
-    private static final String DATABASE_NAME = "WOWAUCTIONBROWSER";
+    private static final String DATABASE_NAME = "wow-auction-house-browser.db";
 
     // Table Names
     private static final String TABLE_ITEM           = "ITEM";

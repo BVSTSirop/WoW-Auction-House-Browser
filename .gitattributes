@@ -1,1 +1,1 @@
-WOWAUCTIONBROWSER filter=lfs diff=lfs merge=lfs -text
+wow-auction-house-browser.db filter=lfs diff=lfs merge=lfs -text
