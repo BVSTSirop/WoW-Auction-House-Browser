@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView realmInput;
     private Spinner              regionSpinner;
     private Button               searchButton;
-    private Button               downloadImagesButton;
 
     private UserSettings        userSettings        = UserSettings.getInstance();
     private ApplicationSettings applicationSettings = ApplicationSettings.getInstance();
@@ -74,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
         this.regionSpinner         = findViewById(R.id.regionSpinner);
         this.realmInput            = findViewById(R.id.realmInput);
         this.searchButton          = findViewById(R.id.searchButton);
-        this.downloadImagesButton  = findViewById(R.id.downloadImagesButton);
 
         // SETUP ADAPTERS
         this.realmInput.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, realms));
@@ -83,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
         // SETUP LISTENERS
         this.regionSpinner.setOnItemSelectedListener(createItemSelectedListener());
         this.searchButton.setOnClickListener(createSearchOnClickListener());
-        this.downloadImagesButton.setOnClickListener(createDownloadImagesOnClickListener());
 
         // CREATE API ACCESS TOKEN
         try {
@@ -126,6 +123,11 @@ public class MainActivity extends AppCompatActivity {
         final boolean itemUpdateRequired = new ItemUpdateService(this).execute().get();
         if(itemUpdateRequired) {
             fetchItems();
+        }
+
+        final boolean itemMediaUpdateRequired = new ItemMediaUpdateService().execute().get();
+        if(itemMediaUpdateRequired) {
+            fetchItemMedia();
         }
     }
 
@@ -198,26 +200,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 AlertUtil.createAlertDialog(MainActivity.this, "Invalid Realm", "You've entered an invalid realm.\nPlease select a realm from the dropdown.");
-            }
-        };
-    }
-
-    private View.OnClickListener createDownloadImagesOnClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean itemMediaUpdateRequired = false;
-
-                try {
-                    itemMediaUpdateRequired = new ItemMediaUpdateService().execute().get();
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                    return;
-                }
-
-                if(itemMediaUpdateRequired) {
-                    fetchItemMedia();
-                }
             }
         };
     }
