@@ -30,7 +30,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          lfs: true
       - name: LFS pull
         run: git lfs pull
       - name: Changelog
