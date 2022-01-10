@@ -1,5 +1,6 @@
 package ch.killenberger.wowauctionhousebrowser.sqlite;
 
+import android.app.backup.FileBackupHelper;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -8,24 +9,32 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import ch.killenberger.wowauctionhousebrowser.BuildConfig;
 import ch.killenberger.wowauctionhousebrowser.enums.ItemQuality;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
 import ch.killenberger.wowauctionhousebrowser.model.item.ItemSubClass;
+import ch.killenberger.wowauctionhousebrowser.util.FileUtil;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    // Logcat tag
-    private static final String LOG = "DatabaseHelper";
-
     // Database Version
     private static final int DATABASE_VERSION = 3;
 
     // Database Name
-    private static final String DATABASE_NAME = "wow-auction-house-browser.db";
+    private static final String DB_DIR_PATH = "/data/data/" + BuildConfig.APPLICATION_ID + "/databases/";
+    private static final String DB_NAME     = "wow-auction-house-browser.db";
+    private static       String DB_PATH     = DB_DIR_PATH + DB_NAME;
+    private static       String OLD_DB_PATH = DB_DIR_PATH + "old_" + DB_NAME;
+
+
 
     // Table Names
     private static final String TABLE_ITEM           = "ITEM";
@@ -81,22 +90,125 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "FOREIGN KEY (" + COL_ITEM_ID + ") REFERENCES " + TABLE_ITEM + " (" + COL_ID +"))";
 
 
+    private final Context myContext;
+
+    private boolean createDatabase = false;
+    private boolean upgradeDatabase = false;
+
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DB_NAME, null, DATABASE_VERSION);
+
+        this.myContext = context;
+        DB_PATH = myContext.getDatabasePath(DB_NAME).getAbsolutePath();
+
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        this.createDatabase = true;
+
         // creating required tables
-        db.execSQL(CREATE_TABLE_ITEM_CLASS);
+        /*db.execSQL(CREATE_TABLE_ITEM_CLASS);
         db.execSQL(CREATE_TABLE_ITEM_SUB_CLASS);
         db.execSQL(CREATE_TABLE_ITEM);
-        db.execSQL(CREATE_TABLE_ITEM_MEDIA);
+        db.execSQL(CREATE_TABLE_ITEM_MEDIA);*/
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        resetDatabase();
+        this.upgradeDatabase = true;
+        // TODO: Upgrade database script
+    }
+
+    /**
+     * Upgrade the database in internal storage if it exists but is not current.
+     * Create a new empty database in internal storage if it does not exist.
+     */
+    public void initializeDataBase() {
+        /*
+         * Creates or updates the database in internal storage if it is needed
+         * before opening the database. In all cases opening the database copies
+         * the database in internal storage to the cache.
+         */
+        getWritableDatabase();
+
+        if (createDatabase) {
+            System.out.println("Create database");
+            /*
+             * If the database is created by the copy method, then the creation
+             * code needs to go here. This method consists of copying the new
+             * database from assets into internal storage and then caching it.
+             */
+            try {
+                /*
+                 * Write over the empty data that was created in internal
+                 * storage with the one in assets and then cache it.
+                 */
+                copyDataBase();
+            } catch (IOException e) {
+                throw new Error("Error copying database");
+            }
+        } else if (upgradeDatabase) {
+            System.out.println("Upgrade database");
+            /*
+             * If the database is upgraded by the copy and reload method, then
+             * the upgrade code needs to go here. This method consists of
+             * renaming the old database in internal storage, create an empty
+             * new database in internal storage, copying the database from
+             * assets to the new database in internal storage, caching the new
+             * database from internal storage, loading the data from the old
+             * database into the new database in the cache and then deleting the
+             * old database from internal storage.
+             */
+            try {
+                FileUtil.copyFile(DB_PATH, OLD_DB_PATH);
+                copyDataBase();
+                SQLiteDatabase old_db = SQLiteDatabase.openDatabase(OLD_DB_PATH, null, SQLiteDatabase.OPEN_READWRITE);
+                SQLiteDatabase new_db = SQLiteDatabase.openDatabase(DB_PATH,null, SQLiteDatabase.OPEN_READWRITE);
+                /*
+                 * Add code to load data into the new database from the old
+                 * database and then delete the old database from internal
+                 * storage after all data has been transferred.
+                 */
+            } catch (IOException e) {
+                throw new Error("Error copying database");
+            }
+        }
+    }
+
+    /**
+     * Copies your database from your local assets-folder to the just created
+     * empty database in the system folder, from where it can be accessed and
+     * handled. This is done by transfering bytestream.
+     * */
+    private void copyDataBase() throws IOException {
+        /*
+         * Close SQLiteOpenHelper so it will commit the created empty database
+         * to internal storage.
+         */
+        close();
+
+        /*
+         * Open the database in the assets folder as the input stream.
+         */
+        InputStream myInput = myContext.getAssets().open(DB_NAME);
+
+        /*
+         * Open the empty db in interal storage as the output stream.
+         */
+        OutputStream myOutput = new FileOutputStream(DB_PATH);
+
+        /*
+         * Copy over the empty db in internal storage with the database in the
+         * assets folder.
+         */
+        FileUtil.copyFile(myInput, myOutput);
+
+        /*
+         * Access the copied database so SQLiteHelper will cache it and mark it
+         * as created.
+         */
+        getWritableDatabase().close();
     }
 
     public long createItem(Item i) {

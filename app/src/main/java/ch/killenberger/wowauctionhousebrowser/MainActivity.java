@@ -35,8 +35,8 @@ import ch.killenberger.wowauctionhousebrowser.service.ItemSubClassUpdateService;
 import ch.killenberger.wowauctionhousebrowser.service.ItemUpdateService;
 import ch.killenberger.wowauctionhousebrowser.service.OAuth2Service;
 import ch.killenberger.wowauctionhousebrowser.service.RealmService;
+import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
-import ch.killenberger.wowauctionhousebrowser.util.DatabaseUtil;
 
 public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView realmInput;
@@ -58,9 +58,18 @@ public class MainActivity extends AppCompatActivity {
         applicationSettings.setApplicationContext(getApplicationContext());
         userSettings.setRegion(Region.US);
 
-        checkPermissions();
+        while(!checkPermissions()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        DatabaseUtil.checkDataBase(this);
+            System.out.println("Waiting for permissions");
+        }
+
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        dbHelper.initializeDataBase();
 
         this.regionSpinner         = findViewById(R.id.regionSpinner);
         this.realmInput            = findViewById(R.id.realmInput);
@@ -213,9 +222,13 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    private void checkPermissions() {
+    private boolean checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+            return false;
         }
+
+        return true;
     }
 }
