@@ -1,13 +1,8 @@
 package ch.killenberger.wowauctionhousebrowser.service;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,14 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Base64;
 
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.oauth2.AccessToken;
-import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class OAuth2Service extends AsyncTask<String, Void, Void> {
     private final Context mContext;
@@ -63,7 +55,7 @@ public class OAuth2Service extends AsyncTask<String, Void, Void> {
                 BufferedReader in = new BufferedReader(new InputStreamReader(content));
                 String line;
 
-                StringBuffer response = new StringBuffer();
+                StringBuilder response = new StringBuilder();
                 while ((line = in.readLine()) != null) {
                     response.append(line);
                 }

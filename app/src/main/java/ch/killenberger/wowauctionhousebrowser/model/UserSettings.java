@@ -1,10 +1,6 @@
 package ch.killenberger.wowauctionhousebrowser.model;
 
-import java.util.List;
-
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
-import ch.killenberger.wowauctionhousebrowser.model.auction.Auction;
-import ch.killenberger.wowauctionhousebrowser.model.auction.AuctionGroup;
 
 public class UserSettings {
 

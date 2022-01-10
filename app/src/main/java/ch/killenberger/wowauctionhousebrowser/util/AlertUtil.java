@@ -1,6 +1,5 @@
 package ch.killenberger.wowauctionhousebrowser.util;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 

@@ -1,7 +1,6 @@
 package ch.killenberger.wowauctionhousebrowser.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -12,8 +11,6 @@ import java.util.Locale;
 import ch.killenberger.wowauctionhousebrowser.enums.ItemQuality;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.item.Item;
-import ch.killenberger.wowauctionhousebrowser.model.item.ItemClass;
-import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 
 public class ItemDeserializer extends StdDeserializer<Item> {
     public ItemDeserializer() {
@@ -31,10 +28,10 @@ public class ItemDeserializer extends StdDeserializer<Item> {
 
         final int         id           = node.get("id").asInt();
         final int         level        = node.get("level").asInt();
-        final String      name         = node.get("name").get(lang.toString()).asText().replaceAll("\"", "").replaceAll("\'", "");
+        final String      name         = node.get("name").get(lang.toString()).asText().replace("\"", "").replace("\'", "");
         final int         classId      = node.get("item_class").get("id").asInt();
         final int         subClassId   = node.get("item_subclass").get("id").asInt();
-        final ItemQuality quality      = ItemQuality.valueOf(node.get("quality").get("name").get("en_US").asText().replaceAll("\"", "").replaceAll("\'", "").replaceAll(" ", "_").toUpperCase());
+        final ItemQuality quality      = ItemQuality.valueOf(node.get("quality").get("name").get("en_US").asText().replace("\"", "").replace("\'", "").replace(" ", "_").toUpperCase());
 
         return new Item(id, name, level, classId, subClassId, quality);
     }

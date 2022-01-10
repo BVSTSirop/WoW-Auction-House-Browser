@@ -103,12 +103,7 @@ public class AuctionGroup implements Comparable<AuctionGroup>, Parcelable {
     public List<Auction> getAuctions() {
         final List<Auction> cloned = new ArrayList<>(this.auctions);
 
-        Collections.sort(cloned, new Comparator<Auction>() {
-            @Override
-            public int compare(Auction a1, Auction a2) {
-                return ((Long)a1.getPrice()).compareTo(a2.getPrice());
-            }
-        });
+        cloned.sort(Comparator.comparingLong(Auction::getPrice));
 
         return cloned;
     }

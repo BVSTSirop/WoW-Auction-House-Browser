@@ -19,7 +19,9 @@ public class Realm {
     @JsonProperty
     private String name;
 
-    public void Realm() { }
+    public void Realm() {
+        // TODO: Realm constructor
+    }
 
     public Realm(final int id, final String slug, final String name) {
         this.id   = id;

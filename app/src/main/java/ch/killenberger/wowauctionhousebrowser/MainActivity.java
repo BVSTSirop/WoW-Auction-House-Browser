@@ -40,8 +40,6 @@ import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 
 public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView realmInput;
-    private Spinner              regionSpinner;
-    private Button               searchButton;
 
     private UserSettings        userSettings        = UserSettings.getInstance();
     private ApplicationSettings applicationSettings = ApplicationSettings.getInstance();
@@ -70,17 +68,17 @@ public class MainActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         dbHelper.initializeDataBase();
 
-        this.regionSpinner         = findViewById(R.id.regionSpinner);
-        this.realmInput            = findViewById(R.id.realmInput);
-        this.searchButton          = findViewById(R.id.searchButton);
+        final Spinner regionSpinner = findViewById(R.id.regionSpinner);
+        final Button  searchButton  = findViewById(R.id.searchButton);
+        this.realmInput             = findViewById(R.id.realmInput);
 
         // SETUP ADAPTERS
         this.realmInput.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, realms));
-        this.regionSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Region.values()));
+        regionSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.support_simple_spinner_dropdown_item, Region.values()));
 
         // SETUP LISTENERS
-        this.regionSpinner.setOnItemSelectedListener(createItemSelectedListener());
-        this.searchButton.setOnClickListener(createSearchOnClickListener());
+        regionSpinner.setOnItemSelectedListener(createItemSelectedListener());
+        searchButton.setOnClickListener(createSearchOnClickListener());
 
         // CREATE API ACCESS TOKEN
         try {
@@ -91,12 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         // NOTIFY USER IF AUTHENTICATION HAS FAILED
         if(ApplicationSettings.getInstance().getAccessToken() == null) {
-            AlertUtil.createAlertDialog(this, "Authorization", "Unable to authorize against the Blizzard API.\nPlease restart the application!", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    finish();
-                    System.exit(0);
-                }
+            AlertUtil.createAlertDialog(this, "Authorization", "Unable to authorize against the Blizzard API.\nPlease restart the application!", (dialog, which) -> {
+                finish();
+                System.exit(0);
             });
         } else {
             try {
@@ -177,30 +172,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private View.OnClickListener createSearchOnClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String selectedRealm = realmInput.getText().toString();
+        return v -> {
+            final String selectedRealm = realmInput.getText().toString();
 
-                for(Realm r : realms) {
-                    if(r.getName().equals(selectedRealm)) {
-                        userSettings.setRealm(r);
+            for(Realm r : realms) {
+                if(r.getName().equals(selectedRealm)) {
+                    userSettings.setRealm(r);
 
-                        try {
-                            userSettings.setConnectedRealmId(new ConnectedRealmService(MainActivity.this).execute().get());
+                    try {
+                        userSettings.setConnectedRealmId(new ConnectedRealmService(MainActivity.this).execute().get());
 
-                            Intent intent = new Intent(getBaseContext(), AuctionsActivity.class);
-                            startActivity(intent);
-                        } catch (ExecutionException | InterruptedException e) {
-                            AlertUtil.createAlertDialog(MainActivity.this, "Oops", getString(R.string.connection_failed_error_msg));
-                        }
-
-                        return;
+                        Intent intent = new Intent(getBaseContext(), AuctionsActivity.class);
+                        startActivity(intent);
+                    } catch (ExecutionException | InterruptedException e) {
+                        AlertUtil.createAlertDialog(MainActivity.this, "Oops", getString(R.string.connection_failed_error_msg));
                     }
-                }
 
-                AlertUtil.createAlertDialog(MainActivity.this, "Invalid Realm", "You've entered an invalid realm.\nPlease select a realm from the dropdown.");
+                    return;
+                }
             }
+
+            AlertUtil.createAlertDialog(MainActivity.this, "Invalid Realm", "You've entered an invalid realm.\nPlease select a realm from the dropdown.");
         };
     }
 

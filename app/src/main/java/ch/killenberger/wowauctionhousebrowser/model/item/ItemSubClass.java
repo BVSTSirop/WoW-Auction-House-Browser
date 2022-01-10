@@ -1,9 +1,7 @@
 package ch.killenberger.wowauctionhousebrowser.model.item;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import ch.killenberger.wowauctionhousebrowser.jackson.ItemClassDeserializer;
 import ch.killenberger.wowauctionhousebrowser.jackson.ItemSubClassDeserializer;
 
 @JsonDeserialize(using = ItemSubClassDeserializer.class)

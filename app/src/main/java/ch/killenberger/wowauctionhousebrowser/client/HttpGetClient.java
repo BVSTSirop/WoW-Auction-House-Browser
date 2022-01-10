@@ -6,11 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Locale;
 import java.util.zip.GZIPInputStream;
-
-import ch.killenberger.wowauctionhousebrowser.enums.Region;
-import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 
 public class HttpGetClient {
 

@@ -1,11 +1,9 @@
 package ch.killenberger.wowauctionhousebrowser.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.node.IntNode;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -22,7 +20,7 @@ public class AccessTokenDeserializer extends StdDeserializer<AccessToken> {
     }
 
     @Override
-    public AccessToken deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public AccessToken deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode node = p.getCodec().readTree(p);
 
         final String  token  = node.get("access_token").asText();

@@ -4,18 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,7 +16,6 @@ import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
 import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
 import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
-import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 import ch.killenberger.wowauctionhousebrowser.util.AlertUtil;
 

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 
 import ch.killenberger.wowauctionhousebrowser.model.auction.Auction;
-import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 
 public class AuctionDeserializer extends StdDeserializer<Auction> {
     public AuctionDeserializer() {

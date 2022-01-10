@@ -1,6 +1,5 @@
 package ch.killenberger.wowauctionhousebrowser.sqlite;
 
-import android.app.backup.FileBackupHelper;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -163,8 +162,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             try {
                 FileUtil.copyFile(DB_PATH, OLD_DB_PATH);
                 copyDataBase();
-                SQLiteDatabase old_db = SQLiteDatabase.openDatabase(OLD_DB_PATH, null, SQLiteDatabase.OPEN_READWRITE);
-                SQLiteDatabase new_db = SQLiteDatabase.openDatabase(DB_PATH,null, SQLiteDatabase.OPEN_READWRITE);
+                try (SQLiteDatabase oldDatabase = SQLiteDatabase.openDatabase(OLD_DB_PATH, null, SQLiteDatabase.OPEN_READWRITE)) {
+                    // TODO: Handle SQLiteException
+                }
+                try (SQLiteDatabase newDatabase = SQLiteDatabase.openDatabase(DB_PATH, null, SQLiteDatabase.OPEN_READWRITE)) {
+                    // TODO: Handle SQLiteException
+                }
                 /*
                  * Add code to load data into the new database from the old
                  * database and then delete the old database from internal
@@ -415,9 +418,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_ID,                 ic.getId());
         values.put(COL_NAME,               ic.getName());
 
-        final long result = db.insert(TABLE_ITEM_CLASS, null, values);
-
-        return result;
+        return db.insert(TABLE_ITEM_CLASS, null, values);
     }
 
     public void createItemClasses(Collection<ItemClass> classes) {

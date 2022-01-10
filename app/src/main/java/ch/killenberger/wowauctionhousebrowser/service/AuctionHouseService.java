@@ -90,17 +90,19 @@ public class AuctionHouseService extends AsyncTask<String, Void, List<AuctionGro
 
             final AuctionGroup group = groups.get(itemId);
 
-            if(group.hasAucitonWithPrice(price)) {
-                Auction a = group.getAuctionByPrice(price);
-                a.setQuantity(a.getQuantity() + auction.getQuantity());
-            } else {
-                group.add(auction);
+            if(group != null) {
+                if (group.hasAucitonWithPrice(price)) {
+                    Auction a = group.getAuctionByPrice(price);
+                    a.setQuantity(a.getQuantity() + auction.getQuantity());
+                } else {
+                    group.add(auction);
+                }
             }
         }
 
         db.close();
 
-        final List<AuctionGroup> result = new ArrayList(groups.values());
+        final List<AuctionGroup> result = new ArrayList<>(groups.values());
         Collections.sort(result);
 
         return result;

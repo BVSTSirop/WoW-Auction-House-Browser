@@ -26,15 +26,15 @@ public class AuctionDetailsAdapter extends RecyclerView.Adapter<AuctionDetailsAd
     public class ViewHolder extends RecyclerView.ViewHolder {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        public TextView id;
-        public TextView  gold;
-        public ImageView goldImg;
-        public TextView  silver;
-        public ImageView silverImg;
-        public TextView  copper;
-        public ImageView copperImg;
-        public TextView level;
-        public TextView quantity;
+        private TextView id;
+        private TextView  gold;
+        private ImageView goldImg;
+        private TextView  silver;
+        private ImageView silverImg;
+        private TextView  copper;
+        private ImageView copperImg;
+        private TextView level;
+        private TextView quantity;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -54,13 +54,11 @@ public class AuctionDetailsAdapter extends RecyclerView.Adapter<AuctionDetailsAd
     }
 
     // Store a member variable for the contacts
-    private final AuctionGroup  group;
     private final Item item;
     private final List<Auction> mAuction;
 
     // Pass in the contact array into the constructor
     public AuctionDetailsAdapter(AuctionGroup group) {
-        this.group    = group;
         this.item     = group.getItem();
         this.mAuction = group.getAuctions();
     }
@@ -74,10 +72,7 @@ public class AuctionDetailsAdapter extends RecyclerView.Adapter<AuctionDetailsAd
         // Inflate the custom layout
         View auctionView = inflater.inflate(R.layout.auction_detail_row_layout, parent, false);
 
-        // Return a new holder instance
-        ViewHolder viewHolder = new ViewHolder(auctionView);
-
-        return viewHolder;
+        return new ViewHolder(auctionView);
     }
 
     // Involves populating data into the item through holder

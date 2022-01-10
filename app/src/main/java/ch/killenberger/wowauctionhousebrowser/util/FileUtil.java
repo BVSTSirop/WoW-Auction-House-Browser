@@ -14,6 +14,10 @@ import java.nio.channels.FileChannel;
 
 public class FileUtil {
 
+    private FileUtil() {
+
+    }
+
     /**
      * Creates the specified <i><b>toFile</b></i> that is a byte for byte a copy
      * of <i><b>fromFile</b></i>. If <i><b>toFile</b></i> already existed, then

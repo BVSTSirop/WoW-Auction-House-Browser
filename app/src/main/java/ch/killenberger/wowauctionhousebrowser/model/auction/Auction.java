@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import ch.killenberger.wowauctionhousebrowser.jackson.AuctionDeserializer;
-import ch.killenberger.wowauctionhousebrowser.model.item.Item;
 import ch.killenberger.wowauctionhousebrowser.util.CurrencyUtil;
 
 @JsonDeserialize(using = AuctionDeserializer.class)

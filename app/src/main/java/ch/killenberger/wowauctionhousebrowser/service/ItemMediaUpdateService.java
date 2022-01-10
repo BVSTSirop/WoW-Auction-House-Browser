@@ -1,19 +1,8 @@
 package ch.killenberger.wowauctionhousebrowser.service;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
-import java.util.Locale;
-
-import ch.killenberger.wowauctionhousebrowser.client.HttpGetClient;
-import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.ApplicationSettings;
-import ch.killenberger.wowauctionhousebrowser.model.UserSettings;
 import ch.killenberger.wowauctionhousebrowser.sqlite.DatabaseHelper;
 
 public class ItemMediaUpdateService extends AsyncTask<String, Integer, Boolean> {
@@ -26,10 +15,6 @@ public class ItemMediaUpdateService extends AsyncTask<String, Integer, Boolean> 
         final int            nrMissingMedia = db.getMissingItemMediaIds().size();
         db.close();
 
-        if(nrMissingMedia - NO_MEDIA_ITEMS.length == 0) {
-            return false;
-        }
-
-        return true;
+        return nrMissingMedia - NO_MEDIA_ITEMS.length != 0;
     }
 }

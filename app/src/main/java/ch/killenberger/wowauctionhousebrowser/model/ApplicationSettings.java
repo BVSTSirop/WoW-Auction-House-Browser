@@ -2,11 +2,8 @@ package ch.killenberger.wowauctionhousebrowser.model;
 
 import android.content.Context;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Locale;
 
-import ch.killenberger.wowauctionhousebrowser.enums.Region;
 import ch.killenberger.wowauctionhousebrowser.model.oauth2.AccessToken;
 
 public class ApplicationSettings {

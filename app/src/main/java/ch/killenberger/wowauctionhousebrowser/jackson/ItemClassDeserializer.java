@@ -1,7 +1,6 @@
 package ch.killenberger.wowauctionhousebrowser.jackson;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -20,7 +19,7 @@ public class ItemClassDeserializer extends StdDeserializer<ItemClass> {
     }
 
     @Override
-    public ItemClass deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public ItemClass deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         final JsonNode node = p.getCodec().readTree(p);
 
         final int       id        = node.get("id").asInt();

@@ -33,17 +33,17 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        public ImageView image;
-        public TextView  id;
-        public TextView  gold;
-        public ImageView goldImg;
-        public TextView  silver;
-        public ImageView silverImg;
-        public TextView  copper;
-        public ImageView copperImg;
-        public TextView  name;
-        public TextView  level;
-        public TextView  quantity;
+        private ImageView image;
+        private TextView  id;
+        private TextView  gold;
+        private ImageView goldImg;
+        private TextView  silver;
+        private ImageView silverImg;
+        private TextView  copper;
+        private ImageView copperImg;
+        private TextView  name;
+        private TextView  level;
+        private TextView  quantity;
 
 
         // We also create a constructor that accepts the entire item row
@@ -90,24 +90,21 @@ public class AuctionsAdapter extends RecyclerView.Adapter<AuctionsAdapter.ViewHo
         // Return a new holder instance
         ViewHolder viewHolder = new ViewHolder(auctionView);
 
-        auctionView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final int itemId = Integer.parseInt((String) viewHolder.id.getText());
+        auctionView.setOnClickListener(v -> {
+            final int itemId = Integer.parseInt((String) viewHolder.id.getText());
 
-                AuctionGroup group = null;
-                for(AuctionGroup g : mAuction) {
-                    if(g.getItem().getId() == itemId) {
-                        group = g;
+            AuctionGroup group = null;
+            for(AuctionGroup g : mAuction) {
+                if(g.getItem().getId() == itemId) {
+                    group = g;
 
-                        break;
-                    }
+                    break;
                 }
-
-                Intent intent = new Intent(context, AuctionDetailsActivity.class);
-                intent.putExtra("AUCTION_GROUP", group);
-                context.startActivity(intent);
             }
+
+            Intent intent = new Intent(context, AuctionDetailsActivity.class);
+            intent.putExtra("AUCTION_GROUP", group);
+            context.startActivity(intent);
         });
         return viewHolder;
     }

@@ -25,12 +25,8 @@ public class AuctionsActivity extends AppCompatActivity {
     private static final String ALL_FILTER_STRING = "All";
 
     private RecyclerView      recyclerView;
-    private Spinner           classSpinner;
-    private Spinner           subClassSpinner;
-    private Button            filterButton;
     private TextInputEditText nameSearchInput;
 
-    private ArrayAdapter<ItemClass>    classAdapter;
     private ArrayAdapter<ItemSubClass> subClassAdapter;
 
     private ItemClass iClass;
@@ -41,25 +37,26 @@ public class AuctionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auctions);
 
+        final Spinner classSpinner    = findViewById(R.id.classSpinner);
+        final Spinner subClassSpinner = findViewById(R.id.subClassSpinner);
+        final Button  filterButton    = findViewById(R.id.auctionFilterButton);
+
         this.recyclerView    = findViewById(R.id.acutionsRecyclerView);
-        this.classSpinner    = findViewById(R.id.classSpinner);
-        this.subClassSpinner = findViewById(R.id.subClassSpinner);
-        this.filterButton    = findViewById(R.id.auctionFilterButton);
         this.nameSearchInput = findViewById(R.id.filterItemNameInput);
 
         // SETUP ADAPTERS
+        final List<ItemClass>         classes      = loadClasses();
+        final ArrayAdapter<ItemClass> classAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, classes);
 
-        final List<ItemClass> classes = loadClasses();
-        this.classAdapter    = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, classes);
         this.subClassAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
 
-        this.classSpinner.setAdapter(classAdapter);
-        this.classSpinner.setOnItemSelectedListener(createClassSelectedListener());
+        classSpinner.setAdapter(classAdapter);
+        classSpinner.setOnItemSelectedListener(createClassSelectedListener());
 
-        this.subClassSpinner.setAdapter(subClassAdapter);
-        this.subClassSpinner.setOnItemSelectedListener(createSubClassSelectedListener());
+        subClassSpinner.setAdapter(subClassAdapter);
+        subClassSpinner.setOnItemSelectedListener(createSubClassSelectedListener());
 
-        this.filterButton.setOnClickListener(createFilterClickListener());
+        filterButton.setOnClickListener(createFilterClickListener());
 
         new AuctionHouseService(this, recyclerView).execute();
     }
@@ -99,7 +96,7 @@ public class AuctionsActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                // TODO: Implement on nothing selected
             }
         };
     }
@@ -113,20 +110,17 @@ public class AuctionsActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                // TODO: Implement on nothing selected
             }
         };
     }
 
     private View.OnClickListener createFilterClickListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AuctionsAdapter auctionsAdapter = (AuctionsAdapter) recyclerView.getAdapter();
-                final String name = nameSearchInput.getText().toString();
+        return v -> {
+            AuctionsAdapter auctionsAdapter = (AuctionsAdapter) recyclerView.getAdapter();
+            final String name = nameSearchInput.getText().toString();
 
-                auctionsAdapter.filter(name, iClass.getId(), iSubClass.getId());
-            }
+            auctionsAdapter.filter(name, iClass.getId(), iSubClass.getId());
         };
     }
 }
